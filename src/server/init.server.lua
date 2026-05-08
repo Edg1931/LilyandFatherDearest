@@ -17,15 +17,25 @@ require(script.ShelterService)
 require(script.AntiCheatService)
 
 -- World construction (deterministic; runs once at server start)
+print("[pawprint] booting world…")
 local WorldBuilder = require(script.WorldBuilder)
 local NpcSpawner = require(script.NpcSpawner)
 local StrayService = require(script.StrayService)
 local TreasureService = require(script.TreasureService)
 
-local container = WorldBuilder.build()
-NpcSpawner.spawnAll(container)
-StrayService.spawnInitial()
-TreasureService.spawnAll()
+local ok, err = pcall(function()
+	local container = WorldBuilder.build()
+	print(("[pawprint] world built — %d props"):format(#container:GetChildren()))
+	NpcSpawner.spawnAll(container)
+	print("[pawprint] NPCs placed")
+	StrayService.spawnInitial()
+	print("[pawprint] strays released")
+	TreasureService.spawnAll()
+	print("[pawprint] treasures scattered")
+end)
+if not ok then
+	warn("[pawprint] world build failed: " .. tostring(err))
+end
 
 local DogService = require(script.DogService)
 local PlayerDataService = require(script.PlayerDataService)
@@ -48,4 +58,4 @@ task.spawn(function()
 	end
 end)
 
-print("[pawprint] server up — world built, " .. #container:GetChildren() .. " props placed")
+print("[pawprint] server up — cap 20, bond-driven tier-ups, hardened trades")
