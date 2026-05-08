@@ -42,11 +42,22 @@ Remotes.NAMES = {
 	QuestStart        = "QuestStart",
 	QuestSubmit       = "QuestSubmit",
 	QuestStateUpdate  = "QuestStateUpdate",
+	-- World interaction (quest givers, objectives, props)
+	WorldInteract     = "WorldInteract",     -- client → server: { entityId, kind, payload }
+	WorldEntitySpawn  = "WorldEntitySpawn",  -- server → client: render this marker
+	WorldEntityDespawn= "WorldEntityDespawn",
 	-- House
 	HousePlace        = "HousePlace",
 	HouseRemove       = "HouseRemove",
 	HouseVisit        = "HouseVisit",
 	HouseLeaveTreat   = "HouseLeaveTreat",
+	-- Properties (Vet, etc.)
+	BuyProperty       = "BuyProperty",
+	-- Shelter
+	ShelterDonate     = "ShelterDonate",     -- visitor donates one of their dogs to host
+	ShelterIntake     = "ShelterIntake",     -- shelter owner intakes a stray (signs to self)
+	ShelterAdoptOut   = "ShelterAdoptOut",   -- shelter owner re-signs stray to a visitor
+	ShelterStateUpdate= "ShelterStateUpdate",
 	-- Tier rolls
 	TierRollAttempt   = "TierRollAttempt",
 	TierRollResult    = "TierRollResult",
