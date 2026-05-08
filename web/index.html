@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1c24" />
+  <title>Pawprint — Web Prototype</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <canvas id="world"></canvas>
+
+  <div id="hud">
+    <div id="hud-top-left">
+      <div class="pill"><span id="coins">💰 0</span></div>
+      <div class="pill"><span id="treats">🍪 0</span></div>
+      <div id="active-dog" class="active-dog">
+        <div class="active-dog-row">
+          <span id="active-emoji">🐶</span>
+          <span id="active-name">No dog</span>
+          <span id="active-tier" class="tier-badge"></span>
+        </div>
+        <div class="bond-bar"><div id="bond-fill"></div></div>
+        <button id="tier-roll-btn" class="hidden">Tier Roll ✨</button>
+      </div>
+    </div>
+
+    <div id="hud-top-right">
+      <button class="menu-btn" data-panel="inventory">🐾</button>
+      <button class="menu-btn" data-panel="quests">📜</button>
+      <button class="menu-btn" data-panel="house">🏡</button>
+      <button class="menu-btn" data-panel="shelter">🏥</button>
+      <button class="menu-btn" data-panel="help">?</button>
+    </div>
+
+    <div id="joystick">
+      <div id="joystick-nub"></div>
+    </div>
+
+    <div id="action-ring">
+      <button class="action-btn" data-verb="interact" title="Interact (E)">🐾</button>
+      <button class="action-btn" data-verb="groom"    title="Groom (F)">🛁</button>
+      <button class="action-btn" data-verb="feed"     title="Feed (G)">🦴</button>
+      <button class="action-btn" data-verb="play"     title="Play (H)">🎾</button>
+      <button class="action-btn" data-verb="pet"      title="Pet (J)">♥</button>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <div id="dialog" class="hidden">
+      <div id="dialog-emoji"></div>
+      <div id="dialog-text"></div>
+      <div id="dialog-actions">
+        <button id="dialog-accept" class="btn-primary">Accept</button>
+        <button id="dialog-cancel" class="btn-secondary">Maybe later</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="panel-inventory">
+    <div class="modal-card">
+      <div class="modal-head"><h2>My Dogs</h2><button class="close-btn" data-close>✕</button></div>
+      <p class="hint">Tap to set as the lead follower (passive bond while they're with you).</p>
+      <div id="inventory-grid" class="grid"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="panel-quests">
+    <div class="modal-card">
+      <div class="modal-head"><h2>Quests</h2><button class="close-btn" data-close>✕</button></div>
+      <div id="active-quest-card" class="quest-active hidden"></div>
+      <h3 class="hint">Find a quest giver in the world (📮 🌳 🥐 🪴 🌉) to start a new one.</h3>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="panel-house">
+    <div class="modal-card">
+      <div class="modal-head"><h2>My House &amp; Yard</h2><button class="close-btn" data-close>✕</button></div>
+      <p class="hint">Your collection on display. Friends visiting can leave one daily treat per day to bump bond.</p>
+      <div id="house-yard" class="yard"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="panel-shelter">
+    <div class="modal-card">
+      <div class="modal-head"><h2>Shelter</h2><button class="close-btn" data-close>✕</button></div>
+      <p class="hint" id="shelter-status">Buy the Vet to open your shelter and start taking in strays.</p>
+      <button id="buy-vet-btn" class="btn-primary">Buy Vet (50,000 💰)</button>
+      <div id="shelter-list" class="grid"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="panel-help">
+    <div class="modal-card">
+      <div class="modal-head"><h2>How to Play</h2><button class="close-btn" data-close>✕</button></div>
+      <div class="help">
+        <p><b>Move</b> — drag the joystick (touch) or use <kbd>WASD</kbd>/<kbd>↑↓←→</kbd>.</p>
+        <p><b>Talk to NPCs</b> — walk up to 📮 🌳 🥐 🪴 🌉 and they'll offer a quest.</p>
+        <p><b>Quest markers</b> glow gold. Walk over them or stand close and tap <b>🐾 interact</b>.</p>
+        <p><b>Bond up</b> — actions on the right ring (groom, feed, play, pet) raise your active dog's bond. Bond also rises passively while they follow you.</p>
+        <p><b>Tier up</b> — when bond crosses a threshold, the <b>Tier Roll ✨</b> button appears. Each roll has a chance based on bond + grooming streak. Failed rolls don't reset bond.</p>
+        <p><b>House &amp; Shelter</b> — top-right buttons. Buy the Vet (50,000 coins) to start a shelter; pre-seeded strays demonstrate the intake flow.</p>
+        <p>Progress saves to your browser. Clear it from the help panel.</p>
+        <button id="reset-progress" class="btn-danger">Reset progress</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

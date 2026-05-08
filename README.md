@@ -11,7 +11,31 @@ See [GAME_DESIGN.md](./GAME_DESIGN.md) for the full design.
 src/shared/   → ReplicatedStorage.Shared (data + remotes)
 src/server/   → ServerScriptService.Server (authoritative logic)
 src/client/   → StarterPlayerScripts.Client (input + UI)
+web/          → browser-playable single-player prototype (Vercel target)
 ```
+
+## Web prototype (mobile-friendly)
+
+`web/` is a vanilla-JS, canvas-based single-player demo that captures the core
+loop (quest → bond → tier roll). Useful for previewing the game on a phone
+without Roblox Studio.
+
+Deploy to Vercel:
+
+1. Push this repo to GitHub.
+2. In Vercel, "Add New Project" → import the repo.
+3. Either accept the defaults (the bundled `vercel.json` rewrites `/` to `web/index.html`),
+   or set **Root Directory** = `web` in Project Settings → General.
+4. Deploy. Open the URL on your phone.
+
+Run locally:
+
+```sh
+cd web && python3 -m http.server 8080
+# or: npx serve web
+```
+
+Progress saves to `localStorage`; reset via the help panel.
 
 ## Sync into Roblox Studio
 
