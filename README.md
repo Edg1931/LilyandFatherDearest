@@ -40,13 +40,60 @@ Progress saves to `localStorage`; reset via the help panel.
 
 ## Sync into Roblox Studio
 
-This project uses [Rojo](https://rojo.space/). After installing Rojo:
+This project uses [Rojo](https://rojo.space/) to sync source files into Studio.
+Rojo is pinned to a specific version in `rokit.toml`, so the install is two
+steps: install Rokit (once on your machine), then let Rokit pull the right
+Rojo for this project.
+
+### 1. Install Rokit (once)
+
+**macOS / Linux:**
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.sh | sh
+```
+
+**Windows (PowerShell):**
+
+```powershell
+iwr https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.ps1 -useb | iex
+```
+
+Restart your terminal so `rokit` is on your PATH.
+
+### 2. Install Rojo for this project
+
+From the repo root:
+
+```sh
+rokit install
+```
+
+This reads `rokit.toml` and installs Rojo 7.6.1. Verify:
+
+```sh
+rojo --version
+```
+
+### 3. Studio plugin
+
+In Roblox Studio: **Plugins → Marketplace → search "Rojo" → Install**. Same
+version as the CLI is best.
+
+### 4. Run
 
 ```sh
 rojo serve default.project.json
 ```
 
-Then in Studio: install the Rojo plugin, click *Connect*, hit *Play*.
+In Studio: open a Baseplate, click the Rojo plugin → **Connect** → port 34872 →
+hit **Play**.
+
+### Alternatives (if Rokit doesn't work for you)
+
+- **Direct binary**: download Rojo for your OS from
+  <https://github.com/rojo-rbx/rojo/releases> and put it on PATH.
+- **From source**: `cargo install rojo` (requires the Rust toolchain; slow first build).
 
 ## Server Cap
 
