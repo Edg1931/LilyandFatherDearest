@@ -100,9 +100,75 @@ hit **Play**.
 `Players.MaxPlayers = 20` is set in the place properties (Studio); a code-level
 fallback in `ServerCapService` rejects 21st joiners.
 
+## In-game keybinds
+
+| Key | Action                                                  |
+|-----|----------------------------------------------------------|
+| `WASD` / left thumb-stick (mobile) | Move                              |
+| `E` / 🐾 button | Interact (NPCs, quest markers, treasures, prompts) |
+| `F` / 🛁 button | Groom active dog                                |
+| `G` / 🦴 button | Feed active dog                                 |
+| `H` / 🎾 button | Play with active dog                            |
+| `J` / ♥ button | Pet active dog                                   |
+| `I` | Toggle Inventory                                            |
+| `L` | Toggle Shelter panel                                        |
+| `M` | Toggle Decor Shop / House Customizer                        |
+| `B` | **Bark** — within range of another player who also barks within 2s, both packs gain +25 bond |
+| `Q` | Quick-start the Daily Walk quest (debug)                    |
+
+## World
+
+Eleven districts radiate from a central plaza:
+
+```
+                         Park (north)
+                            ⬆
+                            │
+              Mountains ◄──Plaza──► Bakery ► Vet ► Downtown
+              + Cave ►                    │
+                  │                       ▼
+              Home district         Riverside, Dog Park, Beach
+```
+
+- **Plaza** — fountain, benches, lampposts, spawn pad
+- **Park** — pond + trees + walking paths
+- **Bakery district** — three walkable shops with vendor NPCs (treats, grooming kits)
+- **Vet district** — hospital interior with Dr Hawthorne who buys you bond, plus the Shelter
+- **Dog Park** — fenced agility course (jumps, weave poles, tunnel)
+- **Beach** — sand, ocean, pier, lifeguard tower, palm-style trees
+- **Downtown** — four skyscrapers + a walkable office
+- **Mountain Pass + Cave** — pine-lined road through peaks into a glowing crystal tunnel
+- **Home district** — your house + four neighbours past the cave; decor auto-arranges in your yard
+
+## Day & night
+
+`TimeService` cycles a full day every 12 real minutes. Lampposts ignite when night
+falls. Sky/ambient/fog all shift through dawn → day → dusk → night colour palettes.
+
+## Dogs
+
+50 breeds across **tiny / small / medium / large / giant** size buckets, each
+with a body shape, ear/tail/pattern variant, primary + secondary colors, and a
+personality vector. Strays roam the world according to their **temperament**:
+energetic dogs cover more ground, lazy dogs dwell longer, shy dogs stay close
+to home. Lure a stray with one 🍪 to add it to your collection.
+
+Five fantasy breeds occupy the Mythic tier: Spectral Whippet, Auroran Hound,
+Cosmic Corgi, Ember Mastiff, Frostfang Husky.
+
 ## Key Files
 
+- `src/shared/DogBreeds.lua` — 50 breeds with size/personality/visual data
+- `src/shared/DecorCatalog.lua` — 35 decor items across 7 categories
+- `src/server/DogRig.lua` — breed-aware procedural dog model
+- `src/server/WorldBuilder.lua` — district + decoration generation
+- `src/server/NpcSpawner.lua` — outdoor quest givers + interior vendors
+- `src/server/StrayService.lua` — wandering strays + lure
+- `src/server/TimeService.lua` — day/night cycle + lamppost toggling
+- `src/server/SocialService.lua` — Bark Code social greeting
+- `src/server/HouseService.lua` — decor purchase + auto-placement
 - `src/server/TradeService.lua` — server-validated trade with hash confirmation
 - `src/server/GroomingService.lua` — bond → tier-up roll math
+- `src/client/HouseEditorUI.lua` — decor catalog browser
 - `src/client/OnScreenControls.lua` — virtual joystick + action ring
 - `src/shared/Tiers.lua` — tier definitions and roll probabilities
