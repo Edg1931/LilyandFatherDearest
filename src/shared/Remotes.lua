@@ -61,6 +61,10 @@ Remotes.NAMES = {
 	-- Tier rolls
 	TierRollAttempt   = "TierRollAttempt",
 	TierRollResult    = "TierRollResult",
+	-- Strays in the world
+	LureStray         = "LureStray",         -- spend a treat to add a wandering stray
+	-- Treasures
+	CollectTreasure   = "CollectTreasure",
 	-- General profile sync
 	ProfileSync       = "ProfileSync",
 }

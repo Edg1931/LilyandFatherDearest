@@ -20,42 +20,42 @@ local entities = {}
 -- from those. Inline coordinates keep the prototype self-contained.
 local SPAWN_POINTS = {
 	lost_postman_package = {
-		find_package = { Vector3.new(20, 5, 12) },
+		find_package = { Vector3.new(20, 5, -160) },
 	},
 	puppy_under_bridge = {
-		find_puppy = { Vector3.new(-40, 2, -22) },
-		carry_home  = { Vector3.new(0, 5, 0) },  -- "your plot" — server resolves to actual plot at runtime
+		find_puppy = { Vector3.new(0, 4, 200) },          -- under the bridge
+		carry_home  = { Vector3.new(-180, 5, -110) },     -- back to the suburbs
 	},
 	scent_of_treats = {
 		trail = {
-			Vector3.new(10, 5, 0),
-			Vector3.new(15, 5, 8),
-			Vector3.new(22, 5, 14),
-			Vector3.new(30, 5, 18),
+			Vector3.new(130, 5, -110),
+			Vector3.new(160, 5, -90),
+			Vector3.new(190, 5, -110),
+			Vector3.new(170, 5, -130),
 		},
 	},
 	buried_bones = {
 		dig_three = {
-			Vector3.new(-12, 3, 30),
-			Vector3.new(-8, 3, 36),
-			Vector3.new(-4, 3, 32),
-			Vector3.new(0, 3, 38),
-			Vector3.new(4, 3, 34),
+			Vector3.new(-200, 5, 110),
+			Vector3.new(-180, 5, 130),
+			Vector3.new(-220, 5, 100),
+			Vector3.new(-190, 5, 90),
+			Vector3.new(-210, 5, 130),
 		},
 	},
 	agility_qualifier = {
-		agility_run = { Vector3.new(50, 5, 50), Vector3.new(60, 5, 80) },  -- start, finish
+		agility_run = { Vector3.new(-40, 5, -150), Vector3.new(40, 5, -200) },  -- start, finish in park
 	},
 	weekly_dog_show = {
-		showcase = { Vector3.new(0, 5, -50) },
+		showcase = { Vector3.new(0, 5, -10) },             -- plaza centre
 	},
 	daily_walk = {
 		walk_route = {
-			Vector3.new(5, 5, 5),
-			Vector3.new(10, 5, 12),
-			Vector3.new(20, 5, 8),
-			Vector3.new(28, 5, 4),
-			Vector3.new(35, 5, 0),
+			Vector3.new(30, 5, -10),
+			Vector3.new(30, 5, 30),
+			Vector3.new(-30, 5, 30),
+			Vector3.new(-30, 5, -10),
+			Vector3.new(0, 5, -40),
 		},
 	},
 }

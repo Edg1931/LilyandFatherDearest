@@ -1,5 +1,7 @@
 -- Pawprint server bootstrap.
--- Each service self-wires its remotes when required.
+
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
 
 require(script.PlayerDataService)
 require(script.ServerCapService)
@@ -14,7 +16,17 @@ require(script.HouseService)
 require(script.ShelterService)
 require(script.AntiCheatService)
 
-local Players = game:GetService("Players")
+-- World construction (deterministic; runs once at server start)
+local WorldBuilder = require(script.WorldBuilder)
+local NpcSpawner = require(script.NpcSpawner)
+local StrayService = require(script.StrayService)
+local TreasureService = require(script.TreasureService)
+
+local container = WorldBuilder.build()
+NpcSpawner.spawnAll(container)
+StrayService.spawnInitial()
+TreasureService.spawnAll()
+
 local DogService = require(script.DogService)
 local PlayerDataService = require(script.PlayerDataService)
 local Remotes = require(game.ReplicatedStorage.Shared.Remotes)
@@ -36,4 +48,4 @@ task.spawn(function()
 	end
 end)
 
-print("[pawprint] server up — cap 20, bond-driven tier-ups, hardened trades")
+print("[pawprint] server up — world built, " .. #container:GetChildren() .. " props placed")
