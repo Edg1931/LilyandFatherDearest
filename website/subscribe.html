@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscribe — Love Coffee Roasters</title>
+  <meta name="description" content="Fresh coffee delivered. Pick a plan, set the cadence, taste a new origin every shipment." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 27c5-3 9-7 9-12a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 5 4 9 9 12z"/>
+            <path d="M11 12c1 1 1 2 0 3M16 11c1 1 1 2 0 3M21 12c1 1 1 2 0 3"/>
+          </svg>
+        </span>
+        <span class="brand-text"><span class="brand-name">Love Coffee Roasters</span><span class="brand-tag">Avon Lake, OH</span></span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="menu.html">Menu</a>
+        <a href="brew.html">Brew Guides</a>
+        <a href="subscribe.html" class="active">Subscribe</a>
+        <a href="quiz.html">Find Your Drink</a>
+        <a href="about.html">About</a>
+        <button class="cart-button" data-open-cart aria-label="Open cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h13l-1.5 9a2 2 0 0 1-2 1.7H9.5a2 2 0 0 1-2-1.7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          <span data-cart-count>0</span>
+        </button>
+        <a class="btn btn-primary" href="menu.html">Order</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <div class="container">
+        <p class="eyebrow">Beans, mailed to your door</p>
+        <h1>Fresh coffee, on a rhythm.</h1>
+        <p class="lede">Pick how often. We roast Tuesday and ship Wednesday — beans land within five days of roast.</p>
+      </div>
+    </section>
+
+    <section class="section section-milk">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Plans</p>
+          <h2>Pick a plan, change it any time.</h2>
+        </div>
+        <div class="plans" id="plans">
+          <article class="plan" data-plan="solo">
+            <h3>Solo Sipper</h3>
+            <p class="muted">For one cup a day, give or take.</p>
+            <p class="price">$18<small>/ shipment</small></p>
+            <ul>
+              <li>1 × 12oz bag</li>
+              <li>Every 4 weeks</li>
+              <li>Free shipping</li>
+              <li>Pause / cancel anytime</li>
+            </ul>
+            <button class="btn btn-outline btn-block" style="margin-top:1rem;">Choose Solo</button>
+          </article>
+          <article class="plan popular" data-plan="couple">
+            <h3>The Pair</h3>
+            <p class="muted">Two-cup mornings or pour-over weekends.</p>
+            <p class="price">$32<small>/ shipment</small></p>
+            <ul>
+              <li>2 × 12oz bags (different origins)</li>
+              <li>Every 2 weeks</li>
+              <li>Free shipping</li>
+              <li>Tasting notes card included</li>
+              <li>10% off any in-store purchase</li>
+            </ul>
+            <button class="btn btn-primary btn-block" style="margin-top:1rem;">Choose The Pair</button>
+          </article>
+          <article class="plan" data-plan="office">
+            <h3>The Office</h3>
+            <p class="muted">For shared kitchens and big homes.</p>
+            <p class="price">$60<small>/ shipment</small></p>
+            <ul>
+              <li>4 × 12oz bags</li>
+              <li>Every 2 weeks</li>
+              <li>Free shipping</li>
+              <li>15% off in-store</li>
+              <li>Free brewing class for 4</li>
+            </ul>
+            <button class="btn btn-outline btn-block" style="margin-top:1rem;">Choose Office</button>
+          </article>
+        </div>
+
+        <div class="card" style="margin-top:2.5rem; padding:1.8rem; max-width:780px; margin-left:auto; margin-right:auto;">
+          <p class="eyebrow">Tell us your taste</p>
+          <h3 style="margin-bottom:0.8rem;">Tune your shipments.</h3>
+          <p class="muted">We'll match origin and roast level to what you actually drink.</p>
+          <div class="form-grid" style="margin-top:1rem;">
+            <div class="field"><label>Roast level</label>
+              <select><option>Light — bright, fruity</option><option selected>Medium — balanced</option><option>Dark — full-bodied</option><option>Surprise me</option></select>
+            </div>
+            <div class="field"><label>Whole bean or ground</label>
+              <select><option selected>Whole bean</option><option>Ground for pour-over</option><option>Ground for French press</option><option>Ground for espresso</option></select>
+            </div>
+            <div class="field"><label>Email</label><input type="email" placeholder="you@yourdomain.com" /></div>
+            <div class="field"><label>Zip code</label><input placeholder="44012" /></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:1rem;" id="sub-cta">Start subscription</button>
+          <p class="muted" style="margin-top:0.6rem; font-size:0.82rem;">Demo only — no payment processed. We'll email you to set up payment when ready.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-cream">
+      <div class="container about-grid">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <h2>Roast Tuesday. Ship Wednesday. Sip Friday.</h2>
+          <p>Most online coffee shops ship beans days or weeks past roast. We roast in tiny lots and ship within 24 hours, so the bag in your hand is at peak flavor.</p>
+        </div>
+        <ul class="value-cards">
+          <li><h3>1. Pick your plan</h3><p>Solo, Pair, or Office. Pause or change any time from your account.</p></li>
+          <li><h3>2. Tell us your taste</h3><p>Roast level, brew method, and origins to skip — we'll do the rest.</p></li>
+          <li><h3>3. We roast Tuesday</h3><p>Tiny lots, by hand. We pull the timer when our cupping team approves the cup.</p></li>
+          <li><h3>4. You sip Friday</h3><p>Ground at request, or whole bean. Free shipping on every order.</p></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <span class="brand-name" style="color:var(--cream); font-size:1.15rem;">Love Coffee Roasters</span>
+          <p style="color:rgba(253,248,241,0.7); margin-top:0.5rem;">Made with love in Avon Lake, Ohio.</p>
+          <p style="color:rgba(253,248,241,0.7);">33473 Lake Rd · Avon Lake, OH 44012<br>(440) 653-9314</p>
+        </div>
+        <div><h4>Order</h4><a href="menu.html">Menu</a><a href="subscribe.html">Subscriptions</a><a href="quiz.html">Find your drink</a></div>
+        <div><h4>Learn</h4><a href="brew.html">Brew guides</a><a href="about.html#beans">Our beans</a><a href="about.html#sustain">Sustainability</a></div>
+        <div><h4>Visit</h4><a href="about.html#visit">Hours &amp; location</a><a href="tel:+14406539314">(440) 653-9314</a><a href="admin.html">Owner login</a></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> Love Coffee Roasters</span>
+        <span>Crafted with care · Avon Lake, OH</span>
+      </div>
+    </div>
+  </footer>
+
+  <aside id="cart-drawer" class="drawer" aria-label="Shopping cart" role="dialog">
+    <div class="drawer-backdrop" data-close-cart></div>
+    <div class="drawer-panel">
+      <header class="drawer-head"><h2>Your cart</h2><button class="drawer-close" data-close-cart aria-label="Close cart">×</button></header>
+      <div class="drawer-body" data-cart-list></div>
+      <footer class="drawer-foot" data-cart-totals></footer>
+    </div>
+  </aside>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    // Plan selection (visual only)
+    document.getElementById("plans").addEventListener("click", function (e) {
+      const card = e.target.closest("[data-plan]");
+      if (!card) return;
+      this.querySelectorAll(".plan").forEach((p) => p.classList.remove("selected"));
+      card.classList.add("selected");
+    });
+    document.getElementById("sub-cta").addEventListener("click", function () {
+      UI.toast("Thanks! We'll email you to set up payment.");
+    });
+  </script>
+</body>
+</html>

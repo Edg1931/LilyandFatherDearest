@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Your Drink — Love Coffee Roasters</title>
+  <meta name="description" content="Take our 6-question quiz and we'll match you to the perfect drink." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 27c5-3 9-7 9-12a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 5 4 9 9 12z"/>
+            <path d="M11 12c1 1 1 2 0 3M16 11c1 1 1 2 0 3M21 12c1 1 1 2 0 3"/>
+          </svg>
+        </span>
+        <span class="brand-text"><span class="brand-name">Love Coffee Roasters</span><span class="brand-tag">Avon Lake, OH</span></span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="menu.html">Menu</a>
+        <a href="brew.html">Brew Guides</a>
+        <a href="subscribe.html">Subscribe</a>
+        <a href="quiz.html" class="active">Find Your Drink</a>
+        <a href="about.html">About</a>
+        <button class="cart-button" data-open-cart aria-label="Open cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h13l-1.5 9a2 2 0 0 1-2 1.7H9.5a2 2 0 0 1-2-1.7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          <span data-cart-count>0</span>
+        </button>
+        <a class="btn btn-primary" href="menu.html">Order</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <div class="container" style="text-align:center;">
+        <p class="eyebrow">6 quick questions</p>
+        <h1>Find your drink.</h1>
+        <p class="lede" style="margin:0 auto;">No wrong answers. Honest takes only — we won't judge if you say "the sweetest one."</p>
+      </div>
+    </section>
+
+    <section class="section section-cream" style="padding-top:1.5rem;">
+      <div class="container">
+        <div class="quiz" id="quiz"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <span class="brand-name" style="color:var(--cream); font-size:1.15rem;">Love Coffee Roasters</span>
+          <p style="color:rgba(253,248,241,0.7); margin-top:0.5rem;">Made with love in Avon Lake, Ohio.</p>
+          <p style="color:rgba(253,248,241,0.7);">33473 Lake Rd · Avon Lake, OH 44012<br>(440) 653-9314</p>
+        </div>
+        <div><h4>Order</h4><a href="menu.html">Menu</a><a href="subscribe.html">Subscriptions</a><a href="quiz.html">Find your drink</a></div>
+        <div><h4>Learn</h4><a href="brew.html">Brew guides</a><a href="about.html#beans">Our beans</a><a href="about.html#sustain">Sustainability</a></div>
+        <div><h4>Visit</h4><a href="about.html#visit">Hours &amp; location</a><a href="tel:+14406539314">(440) 653-9314</a><a href="admin.html">Owner login</a></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> Love Coffee Roasters</span>
+        <span>Crafted with care · Avon Lake, OH</span>
+      </div>
+    </div>
+  </footer>
+
+  <aside id="cart-drawer" class="drawer" aria-label="Shopping cart" role="dialog">
+    <div class="drawer-backdrop" data-close-cart></div>
+    <div class="drawer-panel">
+      <header class="drawer-head"><h2>Your cart</h2><button class="drawer-close" data-close-cart aria-label="Close cart">×</button></header>
+      <div class="drawer-body" data-cart-list></div>
+      <footer class="drawer-foot" data-cart-totals></footer>
+    </div>
+  </aside>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    /**
+     * Coffee personality quiz.
+     * Each option contributes weights to drink categories. After 6 questions we
+     * compute the top match and recommend a real menu item.
+     */
+    const QUESTIONS = [
+      {
+        q: "It's 8 a.m. and you're picking your morning ritual. What sounds best?",
+        opts: [
+          { t: "A bracing wake-up — straight up", w: { bold:3, balanced:1 }, hint: "Espresso lovers" },
+          { t: "Something creamy and comforting",  w: { creamy:3, sweet:1 } },
+          { t: "Bright and clean, like a citrus rinse", w: { bright:3, clean:2 } },
+          { t: "Cold, sweet, and a little playful",   w: { sweet:3, creamy:1 } },
+        ],
+      },
+      {
+        q: "Pick a flavor profile.",
+        opts: [
+          { t: "Chocolate, caramel, nutty",     w: { balanced:3, sweet:1 } },
+          { t: "Floral, fruity, tea-like",      w: { floral:3, bright:1 } },
+          { t: "Earthy, grassy, vegetal",       w: { earthy:3 } },
+          { t: "Spiced, warm, baking-spice-ish", w: { spiced:3 } },
+        ],
+      },
+      {
+        q: "How sweet do you want it?",
+        opts: [
+          { t: "Not sweet at all",       w: { bold:2, clean:2 } },
+          { t: "A whisper of sweetness", w: { balanced:2, floral:1 } },
+          { t: "Properly sweet",         w: { sweet:3 } },
+          { t: "Dessert in a cup",       w: { sweet:3, chocolate:2 } },
+        ],
+      },
+      {
+        q: "Hot or iced?",
+        opts: [
+          { t: "Hot, always",   w: { hot:3 } },
+          { t: "Iced, even in winter", w: { iced:3 } },
+          { t: "Depends on the season", w: { hot:1, iced:1 } },
+          { t: "Surprise me",   w: {} },
+        ],
+      },
+      {
+        q: "Caffeine level?",
+        opts: [
+          { t: "Send the espresso truck",   w: { high:3 } },
+          { t: "Medium — I'm easing in",    w: { med:3 } },
+          { t: "Low. Tea-and-vibes",        w: { low:3 } },
+          { t: "Doesn't matter",            w: {} },
+        ],
+      },
+      {
+        q: "Which café word grabs you?",
+        opts: [
+          { t: "Velvety",  w: { creamy:3 } },
+          { t: "Botanical", w: { floral:3 } },
+          { t: "Toasty",    w: { balanced:2 } },
+          { t: "Boba",      w: { sweet:2, iced:2 } },
+        ],
+      },
+    ];
+
+    // Map "personality" axes to a recommended menu item id (real menu items).
+    const RECOMMENDATIONS = [
+      { id: "lavender_vanilla_latte", needs: ["floral","creamy"], title: "The Romantic" },
+      { id: "tiramisu_latte",         needs: ["sweet","chocolate"], title: "The Dessert Lover" },
+      { id: "brown_sugar_boba",       needs: ["sweet","iced"], title: "The Playful One" },
+      { id: "matcha_latte",           needs: ["earthy"], title: "The Zen One" },
+      { id: "chai_latte",             needs: ["spiced"], title: "The Cozy One" },
+      { id: "cold_brew",              needs: ["bold","iced"], title: "The Cool Customer" },
+      { id: "americano",              needs: ["bold","clean"], title: "The Purist" },
+      { id: "cappuccino",             needs: ["balanced"], title: "The Classicist" },
+      { id: "pour_over",              needs: ["bright","clean"], title: "The Connoisseur" },
+    ];
+
+    let qi = 0;
+    let scores = {};
+
+    function start() {
+      qi = 0; scores = {};
+      render();
+    }
+
+    function render() {
+      const root = document.getElementById("quiz");
+      const progress = ((qi) / QUESTIONS.length) * 100;
+      if (qi >= QUESTIONS.length) return showResult();
+      const q = QUESTIONS[qi];
+      root.innerHTML = `
+        <div class="quiz-progress"><div style="width:${progress}%;"></div></div>
+        <p class="muted" style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--rose); font-weight:600;">Question ${qi + 1} of ${QUESTIONS.length}</p>
+        <div class="quiz-q">
+          <h2>${q.q}</h2>
+          <div class="quiz-options">
+            ${q.opts.map((o, i) => `
+              <button class="quiz-option" data-i="${i}">
+                <strong>${o.t}</strong>
+                ${o.hint ? `<small>${o.hint}</small>` : ""}
+              </button>`).join("")}
+          </div>
+        </div>`;
+      root.querySelectorAll(".quiz-option").forEach((b) => {
+        b.addEventListener("click", () => {
+          const i = parseInt(b.getAttribute("data-i"), 10);
+          const w = q.opts[i].w || {};
+          Object.keys(w).forEach((k) => { scores[k] = (scores[k] || 0) + w[k]; });
+          qi += 1;
+          render();
+        });
+      });
+    }
+
+    function showResult() {
+      // Score every recommendation by summing the score of each "needs" axis.
+      let best = null;
+      let bestScore = -1;
+      RECOMMENDATIONS.forEach((r) => {
+        const s = r.needs.reduce((acc, n) => acc + (scores[n] || 0), 0);
+        if (s > bestScore) { bestScore = s; best = r; }
+      });
+      if (!best) best = RECOMMENDATIONS[0];
+
+      const item = Store.getMenuItem(best.id);
+      const root = document.getElementById("quiz");
+      root.innerHTML = `
+        <div class="quiz-result">
+          <span class="badge-big">${best.title}</span>
+          <h2>Your match: ${item.name}</h2>
+          <p class="muted">${item.tagline}</p>
+          <p style="font-family:'Fraunces',serif; font-size:1.6rem; color:var(--rose); margin:1rem 0;">${Store.fmtUSD(item.price)}</p>
+          <div class="quiz-result-actions">
+            <a class="btn btn-primary" href="menu.html#${item.id}">Add to order</a>
+            <button class="btn btn-outline" id="retake">Retake quiz</button>
+          </div>
+          <p class="muted" style="margin-top:1.4rem; font-size:0.85rem;">Curious about the runners-up? Browse the <a href="menu.html">full menu</a>.</p>
+        </div>`;
+      document.getElementById("retake").addEventListener("click", start);
+    }
+
+    document.addEventListener("DOMContentLoaded", start);
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brew Guides — Love Coffee Roasters</title>
+  <meta name="description" content="Pour-over, French press, AeroPress, and espresso brewing guides plus a built-in dose calculator. Learn to brew great coffee at home." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 27c5-3 9-7 9-12a5 5 0 0 0-9-3 5 5 0 0 0-9 3c0 5 4 9 9 12z"/>
+            <path d="M11 12c1 1 1 2 0 3M16 11c1 1 1 2 0 3M21 12c1 1 1 2 0 3"/>
+          </svg>
+        </span>
+        <span class="brand-text"><span class="brand-name">Love Coffee Roasters</span><span class="brand-tag">Avon Lake, OH</span></span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="menu.html">Menu</a>
+        <a href="brew.html" class="active">Brew Guides</a>
+        <a href="subscribe.html">Subscribe</a>
+        <a href="quiz.html">Find Your Drink</a>
+        <a href="about.html">About</a>
+        <button class="cart-button" data-open-cart aria-label="Open cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h13l-1.5 9a2 2 0 0 1-2 1.7H9.5a2 2 0 0 1-2-1.7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          <span data-cart-count>0</span>
+        </button>
+        <a class="btn btn-primary" href="menu.html">Order</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <div class="container">
+        <p class="eyebrow">Learn · Brew · Enjoy</p>
+        <h1>Brew like we do, at home.</h1>
+        <p class="lede">The recipes we follow on the bar — plus a calculator so you never have to eyeball it.</p>
+      </div>
+    </section>
+
+    <section class="section section-milk">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">The methods</p>
+          <h2>Four ways to a great cup.</h2>
+        </div>
+        <div class="brew-grid">
+          <article class="brew-card">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14l-2 6H7L5 4Z"/><path d="M7 10c.5 6 2 10 5 10s4.5-4 5-10"/></svg>
+            </div>
+            <h3>Pour Over (V60)</h3>
+            <p>Bright, clean, articulate. Best for single-origin lights and naturals.</p>
+            <ul class="brew-stats">
+              <li><strong>1:16</strong>Ratio</li>
+              <li><strong>3:30</strong>Total time</li>
+              <li><strong>200°F</strong>Water</li>
+              <li><strong>Med-fine</strong>Grind</li>
+            </ul>
+          </article>
+          <article class="brew-card">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg>
+            </div>
+            <h3>French Press</h3>
+            <p>Full-bodied, syrupy, easy. The forgiving choice for sleepy mornings.</p>
+            <ul class="brew-stats">
+              <li><strong>1:15</strong>Ratio</li>
+              <li><strong>4:00</strong>Steep</li>
+              <li><strong>200°F</strong>Water</li>
+              <li><strong>Coarse</strong>Grind</li>
+            </ul>
+          </article>
+          <article class="brew-card">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <h3>AeroPress</h3>
+            <p>Fast, smooth, low-acid. Great for travel; great over ice.</p>
+            <ul class="brew-stats">
+              <li><strong>1:14</strong>Ratio</li>
+              <li><strong>1:30</strong>Brew</li>
+              <li><strong>185°F</strong>Water</li>
+              <li><strong>Fine</strong>Grind</li>
+            </ul>
+          </article>
+          <article class="brew-card">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 18v2M16 18v2"/></svg>
+            </div>
+            <h3>Espresso</h3>
+            <p>Concentrated, intense, fast. The base for every milk drink we serve.</p>
+            <ul class="brew-stats">
+              <li><strong>1:2</strong>Ratio</li>
+              <li><strong>0:28</strong>Pull</li>
+              <li><strong>9 bar</strong>Pressure</li>
+              <li><strong>Very fine</strong>Grind</li>
+            </ul>
+          </article>
+          <article class="brew-card">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v6c0 4-3 6-7 6s-7-2-7-6V3Z"/><path d="M19 6h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/></svg>
+            </div>
+            <h3>Cold Brew</h3>
+            <p>Steeped overnight in the fridge — smooth, mellow, never bitter.</p>
+            <ul class="brew-stats">
+              <li><strong>1:8</strong>Ratio</li>
+              <li><strong>18 hr</strong>Steep</li>
+              <li><strong>40°F</strong>Water</li>
+              <li><strong>Coarse</strong>Grind</li>
+            </ul>
+          </article>
+          <article class="brew-card">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c0 5 4 9 9 9s9-4 9-9c0-2-1-4-2-5l-7 5-7-5C4 8 3 10 3 12Z"/></svg>
+            </div>
+            <h3>Chemex</h3>
+            <p>Crisp and clear like a pour-over, with a slower, mellower body.</p>
+            <ul class="brew-stats">
+              <li><strong>1:17</strong>Ratio</li>
+              <li><strong>4:30</strong>Total time</li>
+              <li><strong>200°F</strong>Water</li>
+              <li><strong>Medium</strong>Grind</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-cream">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Built-in dose calculator</p>
+          <h2>How much coffee, how much water?</h2>
+          <p class="section-sub">Pick a method and a yield — we'll do the math.</p>
+        </div>
+        <div class="calc">
+          <div>
+            <div class="calc-input">
+              <label for="method">Method</label>
+              <select id="method">
+                <option value="16">Pour Over (1:16)</option>
+                <option value="15">French Press (1:15)</option>
+                <option value="14">AeroPress (1:14)</option>
+                <option value="17">Chemex (1:17)</option>
+                <option value="8">Cold Brew (1:8)</option>
+                <option value="2">Espresso (1:2)</option>
+              </select>
+            </div>
+            <div class="calc-input" style="margin-top:1rem;">
+              <label for="yield">Final cup size (oz)</label>
+              <input id="yield" type="number" min="1" max="64" value="12" />
+            </div>
+            <div class="calc-input" style="margin-top:1rem;">
+              <label for="strength">Strength</label>
+              <select id="strength">
+                <option value="0.95">A bit lighter</option>
+                <option value="1" selected>House standard</option>
+                <option value="1.05">A bit stronger</option>
+              </select>
+            </div>
+          </div>
+          <div class="calc-output" id="calc-out">
+            <div class="row"><span>Coffee dose</span><strong id="o-dose">—</strong></div>
+            <div class="row"><span>Water</span><strong id="o-water">—</strong></div>
+            <div class="row"><span>Yield</span><strong id="o-yield">—</strong></div>
+            <div class="row"><span>Brew tip</span><strong id="o-tip" style="font-size:0.95rem; text-align:right;">—</strong></div>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:1rem; font-size:0.85rem;">A small kitchen scale is the single biggest jump in home-brew quality. We recommend it more than any gadget.</p>
+      </div>
+    </section>
+
+    <section class="section section-dark">
+      <div class="container cta-strip">
+        <div>
+          <p class="eyebrow">Want to taste the difference at home?</p>
+          <h2>Skip the math — let us pick the beans.</h2>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="subscribe.html">Subscribe to beans</a>
+          <a class="btn btn-outline" href="menu.html#bean_bag">One-off bag</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <span class="brand-name" style="color:var(--cream); font-size:1.15rem;">Love Coffee Roasters</span>
+          <p style="color:rgba(253,248,241,0.7); margin-top:0.5rem;">Made with love in Avon Lake, Ohio.</p>
+          <p style="color:rgba(253,248,241,0.7);">33473 Lake Rd · Avon Lake, OH 44012<br>(440) 653-9314</p>
+        </div>
+        <div><h4>Order</h4><a href="menu.html">Menu</a><a href="subscribe.html">Subscriptions</a><a href="quiz.html">Find your drink</a></div>
+        <div><h4>Learn</h4><a href="brew.html">Brew guides</a><a href="about.html#beans">Our beans</a><a href="about.html#sustain">Sustainability</a></div>
+        <div><h4>Visit</h4><a href="about.html#visit">Hours &amp; location</a><a href="tel:+14406539314">(440) 653-9314</a><a href="admin.html">Owner login</a></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> Love Coffee Roasters</span>
+        <span>Crafted with care · Avon Lake, OH</span>
+      </div>
+    </div>
+  </footer>
+
+  <aside id="cart-drawer" class="drawer" aria-label="Shopping cart" role="dialog">
+    <div class="drawer-backdrop" data-close-cart></div>
+    <div class="drawer-panel">
+      <header class="drawer-head"><h2>Your cart</h2><button class="drawer-close" data-close-cart aria-label="Close cart">×</button></header>
+      <div class="drawer-body" data-cart-list></div>
+      <footer class="drawer-foot" data-cart-totals></footer>
+    </div>
+  </aside>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    // Brew calculator
+    (function () {
+      const tips = {
+        16: "Pour in stages: 50g bloom (30s), then 4 pulses, finishing by 3:30.",
+        15: "Pour all water at once, stir crust at 1:00, plunge at 4:00.",
+        14: "Stir 10s, steep 1:00, plunge for 30s. Try inverted for less acidity.",
+        17: "Chemex prefers a slow, even pour and a medium grind — patience pays off.",
+        8: "Coarse grind, room-temp water, 18 hours in the fridge. Strain through paper.",
+        2: "9 bar pressure, 28 second pull, double basket. Adjust grind first, dose second.",
+      };
+      const m = document.getElementById("method");
+      const y = document.getElementById("yield");
+      const s = document.getElementById("strength");
+      function update() {
+        const ratio = parseFloat(m.value);
+        const ozFinal = parseFloat(y.value || 0);
+        const strength = parseFloat(s.value || 1);
+        // 1 oz water ≈ 29.57 g. Yield ≈ water minus ~10% retention (rough).
+        const waterG = Math.round(ozFinal * 29.57 / 0.9);
+        const doseG = Math.round((waterG / ratio) * strength);
+        document.getElementById("o-dose").textContent = doseG + " g";
+        document.getElementById("o-water").textContent = waterG + " g";
+        document.getElementById("o-yield").textContent = ozFinal + " oz (≈ " + Math.round(ozFinal*29.57) + " g)";
+        document.getElementById("o-tip").textContent = tips[m.value] || "—";
+      }
+      [m, y, s].forEach((el) => el && el.addEventListener("input", update));
+      update();
+    })();
+  </script>
+</body>
+</html>
