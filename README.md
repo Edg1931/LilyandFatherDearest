@@ -16,9 +16,10 @@ web/          → browser-playable single-player prototype (Vercel target)
 
 ## Web prototype (mobile-friendly)
 
-`web/` is a vanilla-JS, canvas-based single-player demo that captures the core
-loop (quest → bond → tier roll). Useful for previewing the game on a phone
-without Roblox Studio.
+`web/` is a vanilla-JS, **3D** single-player demo (Three.js, no build step)
+that captures the core loop (quest → bond → tier roll). Useful for previewing
+the game on a phone without Roblox Studio. Three.js is loaded directly from
+`esm.sh`, so the repo deploys to Vercel as plain static files.
 
 Deploy to Vercel:
 

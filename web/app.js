@@ -1,28 +1,25 @@
+import * as THREE from "https://esm.sh/three@0.171.0";
+
 import {
   TIERS, TIER_NEXT, TIER_VISUAL, BOND_MAX, BOND_THRESHOLDS, TIER_ROLL_BASE, TIER_ROLL_CAP,
   BREEDS, QUESTS, NPCS, SHELTER_SEED_STRAYS, rollBreedByRarity,
 } from "./data.js";
 
 // ===== State =====
-const SAVE_KEY = "pawprint_web_v1";
+const SAVE_KEY = "pawprint_web_v2_3d";
 const VET_PRICE = 50_000;
 
 const state = {
-  player: { x: 300, y: 300, vx: 0, vy: 0, speed: 180 },
+  player: { x: 300, y: 0, z: 300, speed: 200 },
   profile: null,
   world: {
     npcs: NPCS.map(n => ({ ...n })),
     questEntities: [],
   },
   active: { quest: null, objectives: {} },
-  ui: {
-    dialogNpc: null,
-    nearbyNpc: null,
-    nearbyEntity: null,
-    panel: null,
-  },
-  cameraOffset: { x: 0, y: 0 },
+  ui: { dialogNpc: null, nearbyNpc: null, nearbyEntity: null, panel: null },
   followers: [],
+  meshes: { npcs: new Map(), entities: new Map(), followers: new Map(), regions: [] },
 };
 
 function emptyProfile() {
@@ -95,145 +92,260 @@ function activeDog() {
   return id ? state.profile.dogs[id] : null;
 }
 
-// ===== Canvas =====
+// ===== Three.js setup =====
 const canvas = document.getElementById("world");
-const ctx = canvas.getContext("2d");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-const WORLD = { w: 1200, h: 900 };
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x9bd2ff);
+scene.fog = new THREE.Fog(0x9bd2ff, 600, 1600);
 
-function resizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
+const camera = new THREE.PerspectiveCamera(55, 1, 1, 4000);
+const camOffset = new THREE.Vector3(0, 110, 140);
+const camLookOffset = new THREE.Vector3(0, 18, 0);
 
-// ===== World rendering =====
+const sun = new THREE.DirectionalLight(0xfff8e8, 1.1);
+sun.position.set(400, 800, 200);
+scene.add(sun);
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(3000, 3000),
+  new THREE.MeshLambertMaterial({ color: 0x6cab5a })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = 0;
+scene.add(ground);
+
+// World coordinate convention: world X = data.x, world Z = data.y, Y = up.
+const WORLD_SIZE = { w: 1200, h: 900 };
+
 const REGIONS = [
-  { name: "house",   color: "#f0c879", x: 150, y: 150, w: 200, h: 160, label: "🏡 Home" },
-  { name: "park",    color: "#7ab86a", x: 380, y: 180, w: 280, h: 220, label: "🌳 Park" },
-  { name: "bakery",  color: "#d8a070", x: 760, y: 160, w: 260, h: 280, label: "🥐 Bakery" },
-  { name: "meadow",  color: "#8acc78", x: 130, y: 420, w: 240, h: 220, label: "🌾 Meadow" },
-  { name: "river",   color: "#4a8fc8", x: 420, y: 620, w: 360, h: 60,  label: "" },
-  { name: "bridge",  color: "#a8a890", x: 510, y: 600, w: 80,  h: 100, label: "🌉 Bridge" },
-  { name: "shelter", color: "#c0d8e8", x: 820, y: 480, w: 180, h: 140, label: "🏥 Vet" },
+  { name: "house",   color: 0xf0c879, x: 150, z: 150, w: 200, h: 160, label: "🏡 Home" },
+  { name: "park",    color: 0x9ed18a, x: 380, z: 180, w: 280, h: 220, label: "🌳 Park" },
+  { name: "bakery",  color: 0xd8a070, x: 760, z: 160, w: 260, h: 280, label: "🥐 Bakery" },
+  { name: "meadow",  color: 0xa8d894, x: 130, z: 420, w: 240, h: 220, label: "🌾 Meadow" },
+  { name: "river",   color: 0x4a8fc8, x: 420, z: 620, w: 360, h: 60,  label: "" },
+  { name: "bridge",  color: 0xa8a890, x: 510, z: 600, w: 80,  h: 100, label: "🌉 Bridge" },
+  { name: "shelter", color: 0xd0e6f4, x: 820, z: 480, w: 180, h: 140, label: "🏥 Vet" },
 ];
 
-function regionAt(x, y) {
+function buildRegions() {
   for (const r of REGIONS) {
-    if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return r;
+    const isWater = r.name === "river";
+    const tile = new THREE.Mesh(
+      new THREE.PlaneGeometry(r.w, r.h),
+      new THREE.MeshLambertMaterial({ color: r.color })
+    );
+    tile.rotation.x = -Math.PI / 2;
+    tile.position.set(r.x + r.w / 2 - WORLD_SIZE.w / 2, isWater ? -0.4 : 0.4, r.z + r.h / 2 - WORLD_SIZE.h / 2);
+    scene.add(tile);
+    state.meshes.regions.push(tile);
+
+    if (r.label) {
+      const label = makeTextSprite(r.label, 96, "rgba(0,0,0,0.85)", "rgba(255,255,255,0.85)");
+      label.position.set(r.x + r.w / 2 - WORLD_SIZE.w / 2, 30, r.z + r.h / 2 - WORLD_SIZE.h / 2);
+      label.scale.set(80, 28, 1);
+      scene.add(label);
+    }
   }
-  return null;
+
+  // Boundary fence: simple low boxes at edges so the world doesn't feel infinite.
+  const fenceMat = new THREE.MeshLambertMaterial({ color: 0xcebb96 });
+  const halfW = WORLD_SIZE.w / 2, halfH = WORLD_SIZE.h / 2;
+  const sides = [
+    { p: [0, 6, -halfH], s: [WORLD_SIZE.w, 12, 4] },
+    { p: [0, 6,  halfH], s: [WORLD_SIZE.w, 12, 4] },
+    { p: [-halfW, 6, 0], s: [4, 12, WORLD_SIZE.h] },
+    { p: [ halfW, 6, 0], s: [4, 12, WORLD_SIZE.h] },
+  ];
+  for (const f of sides) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...f.s), fenceMat);
+    mesh.position.set(...f.p);
+    scene.add(mesh);
+  }
 }
 
-function drawWorld() {
-  ctx.fillStyle = "#5a9a4c";
-  ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-
-  const camX = state.cameraOffset.x;
-  const camY = state.cameraOffset.y;
-
-  for (const r of REGIONS) {
-    ctx.fillStyle = r.color;
-    ctx.fillRect(r.x - camX, r.y - camY, r.w, r.h);
-    if (r.label) {
-      ctx.fillStyle = "rgba(255,255,255,0.85)";
-      ctx.font = "bold 14px system-ui";
-      ctx.textAlign = "left";
-      ctx.fillText(r.label, r.x - camX + 8, r.y - camY + 18);
-    }
+// ===== Sprite/text helpers =====
+const spriteCache = new Map();
+function makeEmojiSprite(emoji, pixelSize = 128) {
+  const key = `e:${emoji}:${pixelSize}`;
+  if (spriteCache.has(key)) {
+    const m = new THREE.Sprite(spriteCache.get(key).clone());
+    return m;
   }
+  const c = document.createElement("canvas");
+  c.width = c.height = pixelSize;
+  const cx = c.getContext("2d");
+  cx.font = `${pixelSize * 0.78}px serif, 'Apple Color Emoji', 'Segoe UI Emoji'`;
+  cx.textAlign = "center";
+  cx.textBaseline = "middle";
+  cx.fillText(emoji, pixelSize / 2, pixelSize / 2 + 4);
+  const tex = new THREE.CanvasTexture(c);
+  tex.minFilter = THREE.LinearFilter;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, sizeAttenuation: true });
+  spriteCache.set(key, mat);
+  return new THREE.Sprite(mat);
+}
 
-  // Quest entities (gold beams)
-  const t = performance.now() / 400;
-  for (const e of state.world.questEntities) {
-    if (e.consumed) continue;
-    const sx = e.x - camX, sy = e.y - camY;
-    const pulse = 0.5 + 0.3 * Math.sin(t + e.x);
-    ctx.fillStyle = `rgba(255, 215, 80, ${pulse})`;
-    ctx.beginPath();
-    ctx.arc(sx, sy, 18, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(255, 215, 80, 0.95)";
-    ctx.beginPath();
-    ctx.arc(sx, sy, 8, 0, Math.PI * 2);
-    ctx.fill();
-    if (e.kind === "findItem") {
-      ctx.font = "20px serif";
-      ctx.textAlign = "center";
-      ctx.fillStyle = "white";
-      ctx.fillText("📦", sx, sy + 6);
-    }
-    if (e.kind === "scentTrail") {
-      ctx.font = "16px serif";
-      ctx.textAlign = "center";
-      ctx.fillStyle = "white";
-      ctx.fillText(String(e.ord), sx, sy + 5);
-    }
-    if (e.kind === "digSpot") {
-      ctx.font = "16px serif";
-      ctx.textAlign = "center";
-      ctx.fillStyle = "white";
-      ctx.fillText("🦴", sx, sy + 5);
-    }
+function makeTextSprite(text, pixelSize = 128, fg = "white", bg = null) {
+  const c = document.createElement("canvas");
+  c.width = pixelSize * 4;
+  c.height = pixelSize;
+  const cx = c.getContext("2d");
+  if (bg) {
+    cx.fillStyle = bg;
+    cx.fillRect(0, 0, c.width, c.height);
   }
+  cx.font = `bold ${pixelSize * 0.55}px system-ui, sans-serif`;
+  cx.fillStyle = fg;
+  cx.textAlign = "center";
+  cx.textBaseline = "middle";
+  cx.fillText(text, c.width / 2, c.height / 2);
+  const tex = new THREE.CanvasTexture(c);
+  tex.minFilter = THREE.LinearFilter;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+  return new THREE.Sprite(mat);
+}
 
-  // NPCs
+function makeShadow() {
+  const mat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25 });
+  const mesh = new THREE.Mesh(new THREE.CircleGeometry(14, 16), mat);
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.y = 0.5;
+  return mesh;
+}
+
+function worldX(dataX) { return dataX - WORLD_SIZE.w / 2; }
+function worldZ(dataY) { return dataY - WORLD_SIZE.h / 2; }
+
+// ===== Player =====
+const playerGroup = new THREE.Group();
+const playerSprite = makeEmojiSprite("🚶", 128);
+playerSprite.scale.set(36, 36, 1);
+playerSprite.position.y = 22;
+playerGroup.add(playerSprite);
+const playerShadow = makeShadow();
+playerShadow.scale.set(0.9, 0.9, 0.9);
+playerGroup.add(playerShadow);
+scene.add(playerGroup);
+
+// ===== NPCs =====
+function buildNpcs() {
   for (const npc of state.world.npcs) {
-    const sx = npc.x - camX, sy = npc.y - camY;
-    ctx.font = "30px serif";
-    ctx.textAlign = "center";
-    ctx.fillText(npc.emoji, sx, sy);
-    if (state.ui.nearbyNpc === npc) {
-      ctx.fillStyle = "rgba(255,255,255,0.9)";
-      ctx.beginPath();
-      ctx.arc(sx, sy + 10, 18, 0, Math.PI * 2, false);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "white";
-      ctx.stroke();
-    }
+    const grp = new THREE.Group();
+    const post = new THREE.Mesh(
+      new THREE.CylinderGeometry(6, 6, 16, 12),
+      new THREE.MeshLambertMaterial({ color: 0xc8a878 })
+    );
+    post.position.y = 8;
+    grp.add(post);
+    const sprite = makeEmojiSprite(npc.emoji, 128);
+    sprite.scale.set(34, 34, 1);
+    sprite.position.y = 28;
+    grp.add(sprite);
+    const shadow = makeShadow();
+    grp.add(shadow);
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(20, 24, 24),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.0, side: THREE.DoubleSide })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.6;
+    grp.add(ring);
+    grp.userData.ring = ring;
+
+    grp.position.set(worldX(npc.x), 0, worldZ(npc.y));
+    scene.add(grp);
+    state.meshes.npcs.set(npc.id, grp);
+  }
+}
+
+// ===== Quest entity meshes =====
+function buildEntityMesh(e) {
+  const grp = new THREE.Group();
+  const color = e.kind === "scentTrail" ? 0xffb066 : e.kind === "digSpot" ? 0xb88a4a : 0xffd866;
+  const pillar = new THREE.Mesh(
+    new THREE.CylinderGeometry(6, 6, 28, 12),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.65 })
+  );
+  pillar.position.y = 14;
+  grp.add(pillar);
+  const halo = new THREE.Mesh(
+    new THREE.RingGeometry(8, 14, 24),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6, side: THREE.DoubleSide })
+  );
+  halo.rotation.x = -Math.PI / 2;
+  halo.position.y = 0.7;
+  grp.add(halo);
+  grp.userData.halo = halo;
+  grp.userData.pillar = pillar;
+  grp.userData.color = color;
+
+  if (e.kind === "scentTrail") {
+    const num = makeTextSprite(String(e.ord), 64, "white", "rgba(0,0,0,0.6)");
+    num.scale.set(18, 9, 1);
+    num.position.y = 36;
+    grp.add(num);
+  } else if (e.kind === "digSpot") {
+    const bone = makeEmojiSprite("🦴", 96);
+    bone.scale.set(20, 20, 1);
+    bone.position.y = 36;
+    grp.add(bone);
+  } else {
+    const box = makeEmojiSprite("📦", 96);
+    box.scale.set(20, 20, 1);
+    box.position.y = 36;
+    grp.add(box);
   }
 
-  // Followers
-  state.followers.forEach((f, i) => {
-    const dog = state.profile.dogs[f.dogId];
+  grp.position.set(worldX(e.x), 0, worldZ(e.y));
+  return grp;
+}
+
+// ===== Followers =====
+function rebuildFollowers() {
+  for (const [id, mesh] of state.meshes.followers) scene.remove(mesh);
+  state.meshes.followers.clear();
+
+  state.followers = [];
+  (state.profile.followers || []).slice(0, 3).forEach((dogId, i) => {
+    const dog = state.profile.dogs[dogId];
     if (!dog) return;
     const breed = BREEDS[dog.breed];
-    const sx = f.x - camX, sy = f.y - camY;
+    const grp = new THREE.Group();
+    const sprite = makeEmojiSprite(breed.emoji, 128);
+    sprite.scale.set(28, 28, 1);
+    sprite.position.y = 14;
+    grp.add(sprite);
+    const shadow = makeShadow();
+    shadow.scale.set(0.7, 0.7, 0.7);
+    grp.add(shadow);
+
     const visual = TIER_VISUAL[dog.tier];
     if (visual.ring !== "transparent") {
-      ctx.beginPath();
-      ctx.arc(sx, sy + 4, 18, 0, Math.PI * 2);
-      ctx.strokeStyle = visual.ring;
-      ctx.lineWidth = 3;
-      ctx.shadowColor = visual.ring;
-      ctx.shadowBlur = dog.tier === "Neon" || dog.tier === "Mythic" ? 16 : 8;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      const ringColor = new THREE.Color(visual.ring);
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(12, 16, 24),
+        new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0.6;
+      grp.add(ring);
+      grp.userData.ring = ring;
     }
-    ctx.font = "26px serif";
-    ctx.textAlign = "center";
-    ctx.fillText(breed.emoji, sx, sy + 8);
+
+    grp.position.set(state.player.x - 24 - i * 18, 0, state.player.z + 16);
+    scene.add(grp);
+
+    state.followers.push({ dogId, group: grp, vx: 0, vz: 0 });
+    state.meshes.followers.set(dogId, grp);
   });
-
-  // Player
-  const px = state.player.x - camX, py = state.player.y - camY;
-  ctx.font = "30px serif";
-  ctx.textAlign = "center";
-  ctx.fillText("🚶", px, py + 8);
-
-  // Nearby entity hint
-  if (state.ui.nearbyEntity) {
-    const e = state.ui.nearbyEntity;
-    const sx = e.x - camX, sy = e.y - camY;
-    ctx.fillStyle = "white";
-    ctx.font = "12px system-ui";
-    ctx.fillText("Tap 🐾", sx, sy - 24);
-  }
 }
 
 // ===== Movement =====
@@ -241,58 +353,56 @@ const input = { joyX: 0, joyY: 0, keys: new Set() };
 
 function updateMovement(dt) {
   let mx = input.joyX;
-  let my = input.joyY;
-  if (input.keys.has("w") || input.keys.has("ArrowUp"))    my -= 1;
-  if (input.keys.has("s") || input.keys.has("ArrowDown"))  my += 1;
+  let mz = input.joyY;
+  if (input.keys.has("w") || input.keys.has("ArrowUp"))    mz -= 1;
+  if (input.keys.has("s") || input.keys.has("ArrowDown"))  mz += 1;
   if (input.keys.has("a") || input.keys.has("ArrowLeft"))  mx -= 1;
   if (input.keys.has("d") || input.keys.has("ArrowRight")) mx += 1;
-  const mag = Math.hypot(mx, my);
-  if (mag > 1) { mx /= mag; my /= mag; }
+  const mag = Math.hypot(mx, mz);
+  if (mag > 1) { mx /= mag; mz /= mag; }
 
-  const speed = state.player.speed;
-  state.player.x = Math.max(20, Math.min(WORLD.w - 20, state.player.x + mx * speed * dt));
-  state.player.y = Math.max(20, Math.min(WORLD.h - 20, state.player.y + my * speed * dt));
+  const halfW = WORLD_SIZE.w / 2 - 20;
+  const halfH = WORLD_SIZE.h / 2 - 20;
+  state.player.x = Math.max(-halfW, Math.min(halfW, state.player.x + mx * state.player.speed * dt));
+  state.player.z = Math.max(-halfH, Math.min(halfH, state.player.z + mz * state.player.speed * dt));
 
-  // Camera centers on player
-  state.cameraOffset.x = state.player.x - window.innerWidth / 2;
-  state.cameraOffset.y = state.player.y - window.innerHeight / 2;
+  playerGroup.position.set(state.player.x, 0, state.player.z);
 
-  // Followers track loosely
-  let target = { x: state.player.x, y: state.player.y };
+  // Camera follow
+  const target = new THREE.Vector3(state.player.x, 0, state.player.z);
+  camera.position.set(target.x + camOffset.x, target.y + camOffset.y, target.z + camOffset.z);
+  camera.lookAt(target.x + camLookOffset.x, target.y + camLookOffset.y, target.z + camLookOffset.z);
+
+  // Followers trail loosely
+  let leadX = state.player.x, leadZ = state.player.z + 20;
   for (const f of state.followers) {
-    const dx = target.x - f.x, dy = target.y - f.y;
-    const d = Math.hypot(dx, dy);
-    if (d > 36) {
-      f.x += (dx / d) * speed * 0.85 * dt;
-      f.y += (dy / d) * speed * 0.85 * dt;
+    const cx = f.group.position.x, cz = f.group.position.z;
+    const dx = leadX - cx, dz = leadZ - cz;
+    const d = Math.hypot(dx, dz);
+    if (d > 26) {
+      const move = state.player.speed * 0.9 * dt;
+      f.group.position.x += (dx / d) * Math.min(move, d - 25);
+      f.group.position.z += (dz / d) * Math.min(move, d - 25);
     }
-    target = { x: f.x, y: f.y };
+    leadX = f.group.position.x;
+    leadZ = f.group.position.z + 16;
   }
 }
 
-// ===== Followers spawn =====
-function rebuildFollowers() {
-  state.followers = (state.profile.followers || []).slice(0, 3).map((dogId, i) => ({
-    dogId,
-    x: state.player.x - 24 - i * 18,
-    y: state.player.y + 8,
-  }));
-}
-
-// ===== Proximity =====
+// ===== Proximity (XZ) =====
 function nearestNpc() {
   let best = null, bestD = 60;
   for (const npc of state.world.npcs) {
-    const d = Math.hypot(npc.x - state.player.x, npc.y - state.player.y);
+    const d = Math.hypot(worldX(npc.x) - state.player.x, worldZ(npc.y) - state.player.z);
     if (d < bestD) { best = npc; bestD = d; }
   }
   return best;
 }
 function nearestEntity() {
-  let best = null, bestD = 40;
+  let best = null, bestD = 38;
   for (const e of state.world.questEntities) {
     if (e.consumed) continue;
-    const d = Math.hypot(e.x - state.player.x, e.y - state.player.y);
+    const d = Math.hypot(worldX(e.x) - state.player.x, worldZ(e.y) - state.player.z);
     if (d < bestD) { best = e; bestD = d; }
   }
   return best;
@@ -311,18 +421,26 @@ function startQuest(questId) {
   for (const obj of q.objectives) {
     state.active.objectives[obj.id] = { done: false, count: 0, required: obj.count };
   }
+  // Tear down old entity meshes
+  for (const [id, m] of state.meshes.entities) scene.remove(m);
+  state.meshes.entities.clear();
   state.world.questEntities = [];
+
   q.waypoints.forEach((wp, i) => {
     const objId = wp.kind || q.objectives[0].id;
     const obj = q.objectives.find(o => o.id === objId);
-    state.world.questEntities.push({
+    const e = {
       id: uid(),
       x: wp.x, y: wp.y,
       kind: obj.kind,
       objectiveId: obj.id,
       ord: i + 1,
       consumed: false,
-    });
+    };
+    state.world.questEntities.push(e);
+    const mesh = buildEntityMesh(e);
+    scene.add(mesh);
+    state.meshes.entities.set(e.id, mesh);
   });
   toast(`Quest started: ${q.title}`, "good");
   refreshHUD();
@@ -333,15 +451,18 @@ function recordInteraction(entity) {
   if (!q) return;
   const obj = q.objectives.find(o => o.id === entity.objectiveId);
   if (!obj) return;
-  const state_ = state.active.objectives[obj.id];
+  const objSt = state.active.objectives[obj.id];
 
-  if (obj.kind === "scentTrail" && entity.ord !== state_.count + 1) {
+  if (obj.kind === "scentTrail" && entity.ord !== objSt.count + 1) {
     toast("Wrong order — start from the nearest", "bad");
     return;
   }
   entity.consumed = true;
-  state_.count += 1;
-  if (state_.count >= state_.required) state_.done = true;
+  const mesh = state.meshes.entities.get(entity.id);
+  if (mesh) { scene.remove(mesh); state.meshes.entities.delete(entity.id); }
+
+  objSt.count += 1;
+  if (objSt.count >= objSt.required) objSt.done = true;
 
   for (const o of q.objectives) {
     if (!state.active.objectives[o.id].done) {
@@ -381,6 +502,8 @@ function completeQuest() {
   state.active.quest = null;
   state.active.objectives = {};
   state.world.questEntities = [];
+  for (const [id, m] of state.meshes.entities) scene.remove(m);
+  state.meshes.entities.clear();
   save();
   refreshHUD();
 }
@@ -389,6 +512,8 @@ function cancelQuest() {
   state.active.quest = null;
   state.active.objectives = {};
   state.world.questEntities = [];
+  for (const [id, m] of state.meshes.entities) scene.remove(m);
+  state.meshes.entities.clear();
   refreshHUD();
 }
 
@@ -428,6 +553,7 @@ function attemptTierRoll() {
   if (Math.random() < p) {
     const next = TIER_NEXT[dog.tier];
     dog.tier = next;
+    rebuildFollowers();
     toast(`✨ Tier up! ${BREEDS[dog.breed].name} → ${next} (${(p*100).toFixed(0)}%)`, "good");
   } else {
     toast(`Roll failed (${(p*100).toFixed(0)}%). Bond keeps growing.`, "bad");
@@ -742,6 +868,16 @@ document.getElementById("reset-progress").addEventListener("click", () => {
   location.reload();
 });
 
+// ===== Resize =====
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener("resize", resize);
+resize();
+
 // ===== Loop =====
 let last = performance.now();
 let bondAccumulator = 0;
@@ -751,8 +887,34 @@ function loop(now) {
 
   updateMovement(dt);
 
-  state.ui.nearbyNpc = nearestNpc();
+  const npc = nearestNpc();
+  state.ui.nearbyNpc = npc;
+  for (const [id, mesh] of state.meshes.npcs) {
+    const ring = mesh.userData.ring;
+    if (ring) ring.material.opacity = (npc && id === npc.id) ? 0.7 : 0.0;
+  }
+
   state.ui.nearbyEntity = nearestEntity();
+
+  // Pulse markers
+  const pulse = 1 + 0.18 * Math.sin(now / 250);
+  for (const [id, mesh] of state.meshes.entities) {
+    if (mesh.userData.halo) {
+      mesh.userData.halo.scale.set(pulse, pulse, 1);
+      mesh.userData.halo.material.opacity = 0.45 + 0.25 * Math.sin(now / 280);
+    }
+    if (mesh.userData.pillar) {
+      mesh.userData.pillar.position.y = 14 + 1.2 * Math.sin(now / 220);
+    }
+  }
+
+  // Pulse follower tier rings (Neon / Mythic shimmer)
+  for (const [id, mesh] of state.meshes.followers) {
+    const dog = state.profile.dogs[id];
+    if (dog && (dog.tier === "Neon" || dog.tier === "Mythic") && mesh.userData.ring) {
+      mesh.userData.ring.material.opacity = 0.6 + 0.35 * Math.sin(now / 180);
+    }
+  }
 
   bondAccumulator += dt;
   if (bondAccumulator >= 5) {
@@ -768,16 +930,25 @@ function loop(now) {
     if (bumped) { save(); refreshHUD(); }
   }
 
-  drawWorld();
+  renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
 
 // ===== Boot =====
-function boot() {
+async function boot() {
   state.profile = load() || emptyProfile();
   ensureSeed();
+
+  // Initial player position in world coords
+  state.player.x = worldX(state.player.x);
+  state.player.z = worldZ(state.player.z);
+  playerGroup.position.set(state.player.x, 0, state.player.z);
+
+  buildRegions();
+  buildNpcs();
   rebuildFollowers();
   refreshHUD();
+
   if (!state.profile.seenIntro) {
     togglePanel("help");
     state.profile.seenIntro = true;
