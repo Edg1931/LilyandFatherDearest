@@ -65,6 +65,15 @@ Remotes.NAMES = {
 	LureStray         = "LureStray",         -- spend a treat to add a wandering stray
 	-- Treasures
 	CollectTreasure   = "CollectTreasure",
+	-- Decor / customization
+	BuyDecor          = "BuyDecor",
+	SellDecor         = "SellDecor",
+	DecorCatalogSync  = "DecorCatalogSync",
+	-- Social
+	BarkCode          = "BarkCode",
+	BarkCodeAck       = "BarkCodeAck",
+	-- Time
+	TimeOfDayUpdate   = "TimeOfDayUpdate",
 	-- General profile sync
 	ProfileSync       = "ProfileSync",
 }
