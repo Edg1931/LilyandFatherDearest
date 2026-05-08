@@ -5,7 +5,23 @@ local HttpService = game:GetService("HttpService")
 local Constants = require(game.ReplicatedStorage.Shared.Constants)
 
 local PROFILE_VERSION = 1
-local store = DataStoreService:GetDataStore("PawprintProfile_v" .. PROFILE_VERSION)
+
+-- DataStore is unavailable in unpublished Studio places (and when "Enable
+-- Studio Access to API Services" is off). We try to grab a handle, but
+-- swallow failures so the rest of the server still boots; in that case data
+-- is ephemeral (per-session, never persisted), which is fine for dev.
+local store
+do
+	local ok, result = pcall(function()
+		return DataStoreService:GetDataStore("PawprintProfile_v" .. PROFILE_VERSION)
+	end)
+	if ok then
+		store = result
+	else
+		warn("[pawprint] DataStore unavailable — running ephemeral. " ..
+		     "Publish the place and enable Game Settings → Security → 'Enable Studio Access to API Services' to persist saves. (" .. tostring(result) .. ")")
+	end
+end
 
 local PlayerDataService = {}
 PlayerDataService.__index = PlayerDataService
@@ -67,6 +83,7 @@ function PlayerDataService.signDog(profile, breedId, tier, bond)
 end
 
 local function load(userId)
+	if not store then return emptyProfile() end
 	local ok, data = pcall(function() return store:GetAsync("u_" .. userId) end)
 	if ok and data and data.version == PROFILE_VERSION then
 		return data
@@ -75,6 +92,7 @@ local function load(userId)
 end
 
 local function save(userId, data)
+	if not store then return end
 	pcall(function()
 		store:SetAsync("u_" .. userId, data)
 	end)
