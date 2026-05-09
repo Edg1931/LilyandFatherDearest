@@ -154,6 +154,8 @@ end
 
 -- Outdoor quest givers (positions match the new compressed world layout)
 local OUTDOOR = {
+	{ id = "welcome_wendy", name = "Welcome Wendy",  bodyColor = Color3.fromRGB(220, 140, 180), hatColor = Color3.fromRGB(180, 60, 120),
+	  position = Vector3.new(40, 0, 14), tutorial = true, badge = "?", badgeColor = Color3.fromRGB(140, 200, 255), actionText = "How do I play?" },
 	{ id = "park_keeper", name = "Park Keeper",  bodyColor = Color3.fromRGB(80, 130, 60),  hatColor = Color3.fromRGB(40, 80, 40),
 	  position = Vector3.new(-30, 0, -180), quest = "daily_walk", actionText = "Daily Walk" },
 	{ id = "postman",     name = "Henry",       bodyColor = Color3.fromRGB(70, 90, 160),  hatColor = Color3.fromRGB(40, 50, 100),
@@ -202,10 +204,17 @@ local function applyVendor(player, def)
 end
 
 function NpcSpawner.spawnAll(parent)
+	local Remotes = require(game.ReplicatedStorage.Shared.Remotes)
 	for _, def in ipairs(OUTDOOR) do
-		local _, prompt = npcRig(parent, def.name, def.position, def.bodyColor, def.hatColor, "!", Color3.fromRGB(255, 200, 60), def.actionText)
+		local badge = def.badge or "!"
+		local badgeColor = def.badgeColor or Color3.fromRGB(255, 200, 60)
+		local _, prompt = npcRig(parent, def.name, def.position, def.bodyColor, def.hatColor, badge, badgeColor, def.actionText)
 		prompt.Triggered:Connect(function(player)
-			QuestService.start(player, def.quest)
+			if def.tutorial then
+				Remotes.EVENTS[Remotes.NAMES.TutorialOpen]:FireClient(player, { source = "npc" })
+			elseif def.quest then
+				QuestService.start(player, def.quest)
+			end
 		end)
 	end
 	for _, def in ipairs(INTERIOR) do

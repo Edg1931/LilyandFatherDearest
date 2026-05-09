@@ -70,6 +70,11 @@ Remotes.NAMES = {
 	-- Home dog wants
 	HomeWantFulfill   = "HomeWantFulfill",
 	HomeWantUpdate    = "HomeWantUpdate",
+	-- Onboarding + daily login
+	TutorialOpen      = "TutorialOpen",
+	DailyLoginReward  = "DailyLoginReward",
+	-- Live events
+	EventBroadcast    = "EventBroadcast",
 	-- Decor / customization
 	BuyDecor          = "BuyDecor",
 	SellDecor         = "SellDecor",

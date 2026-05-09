@@ -201,17 +201,21 @@ function DogRig.build(breedId, position, parent)
 	-- Tail
 	tail(model, body.Position + Vector3.new(-bodyDims.X * 0.5, 0, 0), def.tail, scale, primary)
 
-	-- Legs (4)
+	-- Legs (4) — store refs for animation
 	local legHeight = 1.0 * scale
 	local legOffsetX = bodyDims.X * 0.32
 	local legOffsetZ = bodyDims.Z * 0.42
-	for _, dx in ipairs({ -1, 1 }) do
-		for _, dz in ipairs({ -1, 1 }) do
-			makePart({ parent = model, color = primary,
-				size = Vector3.new(0.5, legHeight, 0.5) * scale,
-				position = body.Position + Vector3.new(dx * legOffsetX, -bodyDims.Y * 0.5 - legHeight * 0.5, dz * legOffsetZ),
-			})
-		end
+	local legs = {}  -- {fl, fr, bl, br}
+	local legCorners = { { dx = 1,  dz = -1, key = "fl" },
+	                     { dx = 1,  dz = 1,  key = "fr" },
+	                     { dx = -1, dz = -1, key = "bl" },
+	                     { dx = -1, dz = 1,  key = "br" } }
+	for _, c in ipairs(legCorners) do
+		local leg = makePart({ parent = model, color = primary,
+			size = Vector3.new(0.5, legHeight, 0.5) * scale,
+			position = body.Position + Vector3.new(c.dx * legOffsetX, -bodyDims.Y * 0.5 - legHeight * 0.5, c.dz * legOffsetZ),
+		})
+		legs[c.key] = { part = leg, basePos = leg.Position - body.Position }
 	end
 
 	-- Rarity glow ----------------------------------------------------------
@@ -256,7 +260,38 @@ function DogRig.build(breedId, position, parent)
 		end
 	end
 
-	return model, body
+	return model, body, { legs = legs, baseBodyY = body.Position.Y, scale = scale }
+end
+
+-- Animator — call each frame from your service.
+-- `state` is the third return value of build(); `speed` is the magnitude of
+-- the dog's horizontal velocity (studs/sec), used to drive the walk cycle.
+function DogRig.tick(model, body, state, dt, speed)
+	if not body or not body.Parent or not state then return end
+	speed = speed or 0
+	local t = os.clock()
+
+	if speed > 0.5 then
+		-- Walk cycle: alternate diagonal pairs (fl+br) vs (fr+bl).
+		local cycle = (t * (4 + speed * 0.15)) % (math.pi * 2)
+		local liftA = math.max(0, math.sin(cycle)) * 0.7 * state.scale
+		local liftB = math.max(0, math.sin(cycle + math.pi)) * 0.7 * state.scale
+		local function setLeg(key, lift)
+			local info = state.legs[key]
+			if not info or not info.part then return end
+			info.part.CFrame = body.CFrame * CFrame.new(info.basePos.X, info.basePos.Y + lift, info.basePos.Z)
+		end
+		setLeg("fl", liftA); setLeg("br", liftA)
+		setLeg("fr", liftB); setLeg("bl", liftB)
+		-- Body bob
+		body.CFrame = body.CFrame + Vector3.new(0, math.sin(cycle * 2) * 0.08 * state.scale, 0)
+	else
+		-- Idle bob — gentle vertical
+		local bob = math.sin(t * 1.5) * 0.05 * state.scale
+		for key, info in pairs(state.legs) do
+			info.part.CFrame = body.CFrame * CFrame.new(info.basePos.X, info.basePos.Y, info.basePos.Z)
+		end
+	end
 end
 
 return DogRig

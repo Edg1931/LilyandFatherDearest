@@ -125,18 +125,19 @@ function StrayService.spawnAt(home, options)
 	local breedId = pickRandomBreed(options.allowedRarities)
 	local def = DogBreeds.BY_ID[breedId]
 	if not def then return end
-	local model, body = DogRig.build(breedId, home, container)
+	local model, body, rigState = DogRig.build(breedId, home, container)
 	if not model then return end
 
 	local temp = TEMPERAMENT[def.temperament] or TEMPERAMENT.eager
 	local stray = {
-		model = model, body = body,
+		model = model, body = body, rigState = rigState,
 		breed = breedId,
 		home = home,
 		target = pickTarget(home, temp.radius),
 		dwell = math.random(temp.dwell[1], temp.dwell[2]),
 		temperament = temp,
 		def = def,
+		currentSpeed = 0,
 	}
 	strays[model] = stray
 
@@ -158,6 +159,7 @@ local function step(stray, dt)
 	if not stray.body or not stray.body.Parent then return end
 	local pos = stray.body.Position
 	local target = stray.target
+	stray.currentSpeed = 0  -- default; updated below if moving
 	if not target or (Vector3.new(pos.X, 0, pos.Z) - Vector3.new(target.X, 0, target.Z)).Magnitude < 4 then
 		stray.target = pickTarget(stray.home, stray.temperament.radius)
 		stray.dwell = math.random(stray.temperament.dwell[1] * 100, stray.temperament.dwell[2] * 100) / 100
@@ -171,10 +173,9 @@ local function step(stray, dt)
 	dir = Vector3.new(dir.X, 0, dir.Z)
 	if dir.Magnitude < 0.1 then return end
 	local move = dir.Unit * stray.temperament.speed * dt
-	-- Move the whole model so all body parts follow.
+	stray.currentSpeed = stray.temperament.speed
 	if stray.model.PivotTo then
 		stray.model:PivotTo(stray.model:GetPivot() + move)
-		-- Face direction
 		local pivot = stray.model:GetPivot()
 		local lookAng = math.atan2(move.X, move.Z)
 		stray.model:PivotTo(CFrame.new(pivot.Position) * CFrame.Angles(0, lookAng, 0))
@@ -217,6 +218,7 @@ end
 RunService.Heartbeat:Connect(function(dt)
 	for model, stray in pairs(strays) do
 		step(stray, dt)
+		DogRig.tick(model, stray.body, stray.rigState, dt, stray.currentSpeed or 0)
 	end
 end)
 

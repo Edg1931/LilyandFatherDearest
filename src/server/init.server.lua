@@ -18,6 +18,7 @@ require(script.AntiCheatService)
 require(script.SocialService)
 require(script.MountService)
 require(script.HomeWantsService)
+require(script.DailyLoginService)
 
 -- World construction (deterministic; runs once at server start)
 print("[pawprint] booting world…")

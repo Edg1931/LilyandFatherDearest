@@ -8,6 +8,7 @@ local InventoryUI = require(script.InventoryUI)
 local QuestLogUI = require(script.QuestLogUI)
 local ShelterUI = require(script.ShelterUI)
 local HouseEditorUI = require(script.HouseEditorUI)
+local TutorialUI = require(script.TutorialUI)
 
 local Remotes = require(game.ReplicatedStorage.Shared.Remotes)
 local QuestObjectives = require(game.ReplicatedStorage.Shared.QuestObjectives)
@@ -28,6 +29,7 @@ InventoryUI.mount(screen)
 QuestLogUI.mount(screen)
 ShelterUI.mount(screen)
 HouseEditorUI.mount(screen)
+TutorialUI.mount(screen)
 
 local activeDogId
 Remotes.EVENTS[Remotes.NAMES.ProfileSync].OnClientEvent:Connect(function(profile)
