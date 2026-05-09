@@ -4,6 +4,14 @@ local DogRig = {}
 
 local SIZE_SCALE = DogBreeds.SIZE_SCALE
 
+local RARITY_GLOW = {
+	Common   = nil,
+	Uncommon = { color = Color3.fromRGB(255, 255, 255), brightness = 0.8, range = 12 },
+	Rare     = { color = Color3.fromRGB(110, 180, 255), brightness = 1.2, range = 16 },
+	Epic     = { color = Color3.fromRGB(180, 120, 255), brightness = 1.4, range = 18 },
+	Mythic   = { color = Color3.fromRGB(255, 220, 120), brightness = 2.0, range = 22, rainbow = true },
+}
+
 local function makePart(props)
 	local p = Instance.new("Part")
 	p.Anchored = props.anchored == nil and true or props.anchored
@@ -203,6 +211,48 @@ function DogRig.build(breedId, position, parent)
 				size = Vector3.new(0.5, legHeight, 0.5) * scale,
 				position = body.Position + Vector3.new(dx * legOffsetX, -bodyDims.Y * 0.5 - legHeight * 0.5, dz * legOffsetZ),
 			})
+		end
+	end
+
+	-- Rarity glow ----------------------------------------------------------
+	local glow = RARITY_GLOW[def.rarity]
+	if glow then
+		-- Floor halo (always visible from far away)
+		local halo = Instance.new("Part")
+		halo.Anchored = true
+		halo.CanCollide = false
+		halo.CastShadow = false
+		halo.Size = Vector3.new(bodyDims.X * 1.6, 0.4, bodyDims.Z * 1.6)
+		halo.Position = body.Position - Vector3.new(0, bodyDims.Y * 0.5 + legHeight - 0.1, 0)
+		halo.Color = glow.color
+		halo.Material = Enum.Material.Neon
+		halo.Shape = Enum.PartType.Cylinder
+		halo.Transparency = 0.55
+		halo.CFrame = CFrame.new(halo.Position) * CFrame.Angles(0, 0, math.rad(90))
+		halo.Parent = model
+
+		-- PointLight
+		local light = Instance.new("PointLight")
+		light.Color = glow.color
+		light.Brightness = glow.brightness
+		light.Range = glow.range
+		light.Parent = body
+
+		-- Mythic: rainbow shimmer animation via TweenService
+		if glow.rainbow then
+			local TweenService = game:GetService("TweenService")
+			task.spawn(function()
+				local hues = { Color3.fromRGB(255, 100, 100), Color3.fromRGB(255, 200, 100), Color3.fromRGB(255, 255, 100), Color3.fromRGB(100, 255, 100), Color3.fromRGB(100, 200, 255), Color3.fromRGB(180, 100, 255), Color3.fromRGB(255, 100, 200) }
+				local i = 1
+				while halo.Parent do
+					local target = hues[(i % #hues) + 1]
+					local tw = TweenService:Create(halo, TweenInfo.new(1.6, Enum.EasingStyle.Sine), { Color = target })
+					local lt = TweenService:Create(light, TweenInfo.new(1.6, Enum.EasingStyle.Sine), { Color = target })
+					tw:Play(); lt:Play()
+					i += 1
+					task.wait(1.6)
+				end
+			end)
 		end
 	end
 

@@ -5,42 +5,75 @@ local Constants = require(game.ReplicatedStorage.Shared.Constants)
 
 local NpcSpawner = {}
 
-local function makeBillboard(parent, name, line)
+local function makeBadge(parent, char, color)
 	local g = Instance.new("BillboardGui")
-	g.Size = UDim2.fromOffset(190, 60)
-	g.StudsOffset = Vector3.new(0, 4.6, 0)
+	g.Size = UDim2.fromOffset(50, 56)
+	g.StudsOffset = Vector3.new(0, 4.4, 0)
+	g.AlwaysOnTop = true
+	g.LightInfluence = 0
+	g.Parent = parent
+
+	-- Outer halo
+	local halo = Instance.new("Frame")
+	halo.AnchorPoint = Vector2.new(0.5, 0.5)
+	halo.Position = UDim2.fromScale(0.5, 0.5)
+	halo.Size = UDim2.fromScale(1, 1)
+	halo.BackgroundColor3 = color
+	halo.BackgroundTransparency = 0.7
+	halo.BorderSizePixel = 0
+	halo.Parent = g
+	local hc = Instance.new("UICorner") hc.CornerRadius = UDim.new(1, 0) hc.Parent = halo
+
+	-- Inner bubble with character
+	local bubble = Instance.new("TextLabel")
+	bubble.AnchorPoint = Vector2.new(0.5, 0.5)
+	bubble.Position = UDim2.fromScale(0.5, 0.5)
+	bubble.Size = UDim2.fromScale(0.7, 0.7)
+	bubble.BackgroundColor3 = color
+	bubble.BorderSizePixel = 0
+	bubble.Font = Enum.Font.GothamBlack
+	bubble.TextSize = 22
+	bubble.TextColor3 = Color3.new(1, 1, 1)
+	bubble.Text = char
+	bubble.Parent = g
+	local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(1, 0) bc.Parent = bubble
+
+	-- Pulse animation via TweenService
+	local TweenService = game:GetService("TweenService")
+	local tweenIn = TweenService:Create(halo, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+		Size = UDim2.fromScale(1.3, 1.3),
+		BackgroundTransparency = 0.95,
+	})
+	tweenIn:Play()
+
+	return g
+end
+
+local function makeNamePlate(parent, name)
+	local g = Instance.new("BillboardGui")
+	g.Size = UDim2.fromOffset(140, 18)
+	g.StudsOffset = Vector3.new(0, 3, 0)
 	g.AlwaysOnTop = true
 	g.Parent = parent
 
 	local frame = Instance.new("Frame")
 	frame.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
-	frame.BackgroundTransparency = 0.18
+	frame.BackgroundTransparency = 0.25
 	frame.Size = UDim2.fromScale(1, 1)
 	frame.Parent = g
-	local fc = Instance.new("UICorner") fc.CornerRadius = UDim.new(0, 8) fc.Parent = frame
+	local fc = Instance.new("UICorner") fc.CornerRadius = UDim.new(0, 6) fc.Parent = frame
 
-	local nameLabel = Instance.new("TextLabel")
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.Size = UDim2.new(1, 0, 0, 26)
-	nameLabel.Font = Enum.Font.GothamBold
-	nameLabel.TextSize = 14
-	nameLabel.TextColor3 = Color3.fromRGB(255, 230, 130)
-	nameLabel.Text = name
-	nameLabel.Parent = frame
-
-	local lineLabel = Instance.new("TextLabel")
-	lineLabel.BackgroundTransparency = 1
-	lineLabel.Position = UDim2.new(0, 4, 0, 28)
-	lineLabel.Size = UDim2.new(1, -8, 0, 28)
-	lineLabel.Font = Enum.Font.Gotham
-	lineLabel.TextSize = 11
-	lineLabel.TextColor3 = Color3.fromRGB(220, 220, 230)
-	lineLabel.TextWrapped = true
-	lineLabel.Text = line
-	lineLabel.Parent = frame
+	local lbl = Instance.new("TextLabel")
+	lbl.BackgroundTransparency = 1
+	lbl.Size = UDim2.fromScale(1, 1)
+	lbl.Font = Enum.Font.GothamBold
+	lbl.TextSize = 11
+	lbl.TextColor3 = Color3.fromRGB(220, 220, 230)
+	lbl.Text = name
+	lbl.Parent = frame
 end
 
-local function npcRig(parent, name, position, bodyColor, hatColor, line, prompt)
+local function npcRig(parent, name, position, bodyColor, hatColor, badge, badgeColor, prompt)
 	local model = Instance.new("Model")
 	model.Name = "NPC_" .. name
 	model.Parent = parent
@@ -56,22 +89,18 @@ local function npcRig(parent, name, position, bodyColor, hatColor, line, prompt)
 	body.BottomSurface = Enum.SurfaceType.Smooth
 	body.Parent = model
 
-	-- Arms (decorative)
 	for _, sx in ipairs({ -1, 1 }) do
 		local arm = Instance.new("Part")
-		arm.Anchored = true
-		arm.CanCollide = false
+		arm.Anchored = true arm.CanCollide = false
 		arm.Material = Enum.Material.SmoothPlastic
 		arm.Color = bodyColor
 		arm.Size = Vector3.new(0.8, 3, 0.8)
 		arm.Position = position + Vector3.new(sx * 1.2, 2, 0)
 		arm.Parent = model
 	end
-	-- Legs
 	for _, sx in ipairs({ -0.5, 0.5 }) do
 		local leg = Instance.new("Part")
-		leg.Anchored = true
-		leg.CanCollide = false
+		leg.Anchored = true leg.CanCollide = false
 		leg.Material = Enum.Material.SmoothPlastic
 		leg.Color = Color3.fromRGB(40, 40, 60)
 		leg.Size = Vector3.new(0.8, 2, 0.8)
@@ -80,20 +109,16 @@ local function npcRig(parent, name, position, bodyColor, hatColor, line, prompt)
 	end
 
 	local head = Instance.new("Part")
-	head.Anchored = true
-	head.CanCollide = false
+	head.Anchored = true head.CanCollide = false
 	head.Material = Enum.Material.SmoothPlastic
 	head.Color = Color3.fromRGB(244, 210, 178)
 	head.Size = Vector3.new(1.6, 1.6, 1.6)
 	head.Shape = Enum.PartType.Ball
 	head.Position = position + Vector3.new(0, 4.8, 0)
 	head.Parent = model
-
-	-- Eyes
 	for _, sz in ipairs({ -0.4, 0.4 }) do
 		local eye = Instance.new("Part")
-		eye.Anchored = true
-		eye.CanCollide = false
+		eye.Anchored = true eye.CanCollide = false
 		eye.Material = Enum.Material.SmoothPlastic
 		eye.Color = Color3.fromRGB(20, 20, 25)
 		eye.Size = Vector3.new(0.2, 0.25, 0.25)
@@ -103,8 +128,7 @@ local function npcRig(parent, name, position, bodyColor, hatColor, line, prompt)
 	end
 
 	local hat = Instance.new("Part")
-	hat.Anchored = true
-	hat.CanCollide = false
+	hat.Anchored = true hat.CanCollide = false
 	hat.Material = Enum.Material.SmoothPlastic
 	hat.Color = hatColor
 	hat.Shape = Enum.PartType.Cylinder
@@ -113,7 +137,10 @@ local function npcRig(parent, name, position, bodyColor, hatColor, line, prompt)
 	hat.Parent = model
 
 	model.PrimaryPart = body
-	makeBillboard(head, name, line)
+	makeNamePlate(head, name)
+	if badge then
+		makeBadge(head, badge, badgeColor or Color3.fromRGB(255, 200, 60))
+	end
 
 	local p = Instance.new("ProximityPrompt")
 	p.ActionText = prompt or "Talk"
@@ -125,73 +152,58 @@ local function npcRig(parent, name, position, bodyColor, hatColor, line, prompt)
 	return model, p
 end
 
--- ============================================================ outdoor quest givers
+-- Outdoor quest givers (positions match the new compressed world layout)
 local OUTDOOR = {
-	{ id = "park_keeper", name = "Park Keeper", line = "Care for a daily walk?",  bodyColor = Color3.fromRGB(80, 130, 60),  hatColor = Color3.fromRGB(40, 80, 40),
-	  position = Vector3.new(-30, 0, -300), quest = "daily_walk" },
-	{ id = "postman",     name = "Henry",      line = "I lost a package somewhere in the park!", bodyColor = Color3.fromRGB(70, 90, 160),  hatColor = Color3.fromRGB(40, 50, 100),
-	  position = Vector3.new(280, 0, -150),  quest = "lost_postman_package" },
-	{ id = "ranger",      name = "Ranger Sue", line = "Buried bones in the meadow…", bodyColor = Color3.fromRGB(150, 100, 60), hatColor = Color3.fromRGB(110, 70, 40),
-	  position = Vector3.new(-300, 0, 380),  quest = "buried_bones" },
-	{ id = "stranger",    name = "Stranger",   line = "A puppy whimpers under the bridge.", bodyColor = Color3.fromRGB(120, 80, 100), hatColor = Color3.fromRGB(60, 40, 60),
-	  position = Vector3.new(-50, 0, 320),  quest = "puppy_under_bridge" },
-	{ id = "trainer",     name = "Trainer Joy", line = "Run the agility course in the dog park!", bodyColor = Color3.fromRGB(200, 90, 90), hatColor = Color3.fromRGB(100, 30, 30),
-	  position = Vector3.new(150, 0, 460),  quest = "agility_qualifier" },
+	{ id = "park_keeper", name = "Park Keeper",  bodyColor = Color3.fromRGB(80, 130, 60),  hatColor = Color3.fromRGB(40, 80, 40),
+	  position = Vector3.new(-30, 0, -180), quest = "daily_walk", actionText = "Daily Walk" },
+	{ id = "postman",     name = "Henry",       bodyColor = Color3.fromRGB(70, 90, 160),  hatColor = Color3.fromRGB(40, 50, 100),
+	  position = Vector3.new(150, 0, -90),  quest = "lost_postman_package", actionText = "Find Package" },
+	{ id = "ranger",      name = "Ranger Sue",  bodyColor = Color3.fromRGB(150, 100, 60), hatColor = Color3.fromRGB(110, 70, 40),
+	  position = Vector3.new(-180, 0, 220), quest = "buried_bones", actionText = "Dig Quest" },
+	{ id = "stranger",    name = "Stranger",    bodyColor = Color3.fromRGB(120, 80, 100), hatColor = Color3.fromRGB(60, 40, 60),
+	  position = Vector3.new(-30, 0, 170),  quest = "puppy_under_bridge", actionText = "Help puppy" },
+	{ id = "trainer",     name = "Trainer Joy", bodyColor = Color3.fromRGB(200, 90, 90),  hatColor = Color3.fromRGB(100, 30, 30),
+	  position = Vector3.new(80, 0, 240),   quest = "agility_qualifier", actionText = "Agility" },
 }
 
--- ============================================================ interior NPCs (vendors & flavor)
 local INTERIOR = {
-	{ id = "baker_mae", name = "Baker Mae", line = "My biscuits trailed off into the bakery district. Follow the trail!",
-	  bodyColor = Color3.fromRGB(220, 170, 120), hatColor = Color3.fromRGB(255, 255, 255),
-	  anchorKey = "bakery_interior", quest = "scent_of_treats" },
-	{ id = "cafe_pat", name = "Café Pat", line = "Welcome! Take a seat anywhere.",
-	  bodyColor = Color3.fromRGB(120, 80, 50), hatColor = Color3.fromRGB(80, 50, 30),
-	  anchorKey = "cafe_interior", vendor = { kind = "treat", price = 60, label = "Buy 1 🍪 (60 💰)" } },
-	{ id = "treats_vendor", name = "Marigold", line = "Grooming kits in stock today!",
-	  bodyColor = Color3.fromRGB(200, 130, 200), hatColor = Color3.fromRGB(150, 80, 150),
-	  anchorKey = "treats_interior", vendor = { kind = "groom_kit", price = 200, label = "Buy grooming kit (200 💰)" } },
-	{ id = "vet_doc", name = "Dr Hawthorne", line = "I can pamper your active dog — fast bond, on the house!",
-	  bodyColor = Color3.fromRGB(220, 240, 250), hatColor = Color3.fromRGB(80, 130, 200),
-	  anchorKey = "vet_interior", vendor = { kind = "vet_visit", price = 150, label = "Vet visit (150 💰)" } },
-	{ id = "shelter_lin", name = "Shelter Lin", line = "Donate a dog and we'll find them a home.",
-	  bodyColor = Color3.fromRGB(240, 240, 240), hatColor = Color3.fromRGB(160, 60, 60),
+	{ id = "baker_mae",     name = "Baker Mae",      bodyColor = Color3.fromRGB(220, 170, 120), hatColor = Color3.fromRGB(255, 255, 255),
+	  anchorKey = "bakery_interior", quest = "scent_of_treats", actionText = "Scent Quest" },
+	{ id = "cafe_pat",      name = "Café Pat",       bodyColor = Color3.fromRGB(120, 80, 50), hatColor = Color3.fromRGB(80, 50, 30),
+	  anchorKey = "cafe_interior",   vendor = { kind = "treat", price = 60, label = "Buy 1 🍪 (60 💰)" } },
+	{ id = "treats_vendor", name = "Marigold",       bodyColor = Color3.fromRGB(200, 130, 200), hatColor = Color3.fromRGB(150, 80, 150),
+	  anchorKey = "treats_interior", vendor = { kind = "groom_kit", price = 200, label = "Grooming kit (200 💰)" } },
+	{ id = "vet_doc",       name = "Dr Hawthorne",   bodyColor = Color3.fromRGB(220, 240, 250), hatColor = Color3.fromRGB(80, 130, 200),
+	  anchorKey = "vet_interior",    vendor = { kind = "vet_visit", price = 150, label = "Vet visit (150 💰)" } },
+	{ id = "shelter_lin",   name = "Shelter Lin",    bodyColor = Color3.fromRGB(240, 240, 240), hatColor = Color3.fromRGB(160, 60, 60),
 	  anchorKey = "shelter_interior" },
-	{ id = "office_kim", name = "Office Kim", line = "Downtown's never quiet, is it?",
-	  bodyColor = Color3.fromRGB(150, 170, 200), hatColor = Color3.fromRGB(60, 80, 120),
+	{ id = "office_kim",    name = "Office Kim",     bodyColor = Color3.fromRGB(150, 170, 200), hatColor = Color3.fromRGB(60, 80, 120),
 	  anchorKey = "office_interior" },
 }
 
--- ============================================================ vendor handlers
 local function applyVendor(player, def)
 	local vendor = def.vendor
 	if not vendor then return end
 	local profile = PlayerDataService.get(player)
 	if not profile then return end
 	if profile.coins < vendor.price then return end
-
 	profile.coins -= vendor.price
-
 	if vendor.kind == "treat" then
 		profile.treats = (profile.treats or 0) + 1
 	elseif vendor.kind == "groom_kit" then
 		local id = profile.followers[1]
 		local dog = id and profile.dogs[id]
-		if dog then
-			dog.bond = math.min(Constants.BOND_MAX, dog.bond + 60)
-			dog.groomingStreak = (dog.groomingStreak or 0) + 1
-		end
+		if dog then dog.bond = math.min(Constants.BOND_MAX, dog.bond + 60) dog.groomingStreak = (dog.groomingStreak or 0) + 1 end
 	elseif vendor.kind == "vet_visit" then
 		local id = profile.followers[1]
 		local dog = id and profile.dogs[id]
-		if dog then
-			dog.bond = math.min(Constants.BOND_MAX, dog.bond + 100)
-		end
+		if dog then dog.bond = math.min(Constants.BOND_MAX, dog.bond + 100) end
 	end
 end
 
 function NpcSpawner.spawnAll(parent)
 	for _, def in ipairs(OUTDOOR) do
-		local _, prompt = npcRig(parent, def.name, def.position, def.bodyColor, def.hatColor, def.line, "Talk")
+		local _, prompt = npcRig(parent, def.name, def.position, def.bodyColor, def.hatColor, "!", Color3.fromRGB(255, 200, 60), def.actionText)
 		prompt.Triggered:Connect(function(player)
 			QuestService.start(player, def.quest)
 		end)
@@ -199,15 +211,15 @@ function NpcSpawner.spawnAll(parent)
 	for _, def in ipairs(INTERIOR) do
 		local anchor = WorldBuilder._npcAnchors[def.anchorKey]
 		if anchor then
-			local actionText = def.vendor and def.vendor.label or "Talk"
-			local _, prompt = npcRig(parent, def.name, anchor, def.bodyColor, def.hatColor, def.line, actionText)
+			local badge, badgeColor
+			if def.quest then badge, badgeColor = "!", Color3.fromRGB(255, 200, 60)
+			elseif def.vendor then badge, badgeColor = "$", Color3.fromRGB(120, 220, 140)
+			else badge, badgeColor = "💬", Color3.fromRGB(140, 180, 220) end
+			local actionText = def.vendor and def.vendor.label or (def.quest and def.quest:gsub("_", " ")) or "Talk"
+			local _, prompt = npcRig(parent, def.name, anchor, def.bodyColor, def.hatColor, badge, badgeColor, actionText)
 			prompt.Triggered:Connect(function(player)
-				if def.quest then
-					QuestService.start(player, def.quest)
-				end
-				if def.vendor then
-					applyVendor(player, def)
-				end
+				if def.quest then QuestService.start(player, def.quest) end
+				if def.vendor then applyVendor(player, def) end
 			end)
 		end
 	end

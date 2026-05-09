@@ -166,15 +166,15 @@ local function step(stray, dt)
 end
 
 local STRAY_HOMES = {
-	Vector3.new(-50, 0, -300),    -- park
-	Vector3.new(80,  0, -350),    -- park east
-	Vector3.new(-300, 0, 380),     -- meadow
-	Vector3.new(280, 0, 250),    -- dog park
-	Vector3.new(-100, 0, 700),    -- beach
-	Vector3.new(640, 0, 80),     -- downtown
-	Vector3.new(-220, 0, 60),     -- suburbs alley
-	Vector3.new(-1100, 0, 0),     -- home district
-	Vector3.new(0, 0, 350),      -- riverside
+	Vector3.new(-30, 0, -180),     -- park
+	Vector3.new(50,  0, -220),     -- park east
+	Vector3.new(-180, 0, 220),     -- meadow
+	Vector3.new(160, 0, 230),      -- dog park
+	Vector3.new(-60, 0, 380),      -- beach
+	Vector3.new(360, 0, 80),       -- downtown
+	Vector3.new(-140, 0, 30),      -- suburbs alley
+	Vector3.new(-610, 0, 80),      -- home district
+	Vector3.new(0, 0, 200),        -- riverside
 }
 
 function StrayService.spawnInitial()

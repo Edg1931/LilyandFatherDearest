@@ -69,6 +69,9 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if input.KeyCode == Enum.KeyCode.B then
 		Remotes.EVENTS[Remotes.NAMES.BarkCode]:FireServer()
 	end
+	if input.KeyCode == Enum.KeyCode.R then
+		Remotes.EVENTS[Remotes.NAMES.RideDog]:FireServer()
+	end
 	if input.KeyCode == Enum.KeyCode.Q then QuestLogUI.startQuest("daily_walk") end
 end)
 

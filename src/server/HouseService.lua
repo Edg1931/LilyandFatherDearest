@@ -10,7 +10,7 @@ local EconomyService = require(script.Parent.EconomyService)
 
 local HouseService = {}
 
-local HOME_DISTRICT_CENTER = Vector3.new(-1100, 0, 0)
+local HOME_DISTRICT_CENTER = Vector3.new(-610, 0, 0)
 local PLOT_RADIUS = 80
 local PLACED_FOLDER_NAME = "PlayerDecor"
 local placedByPlayer = {}  -- userId → folder

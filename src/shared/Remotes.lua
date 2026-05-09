@@ -63,8 +63,13 @@ Remotes.NAMES = {
 	TierRollResult    = "TierRollResult",
 	-- Strays in the world
 	LureStray         = "LureStray",         -- spend a treat to add a wandering stray
+	-- Mount / fast travel
+	RideDog           = "RideDog",
 	-- Treasures
 	CollectTreasure   = "CollectTreasure",
+	-- Home dog wants
+	HomeWantFulfill   = "HomeWantFulfill",
+	HomeWantUpdate    = "HomeWantUpdate",
 	-- Decor / customization
 	BuyDecor          = "BuyDecor",
 	SellDecor         = "SellDecor",
