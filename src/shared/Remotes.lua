@@ -61,6 +61,29 @@ Remotes.NAMES = {
 	-- Tier rolls
 	TierRollAttempt   = "TierRollAttempt",
 	TierRollResult    = "TierRollResult",
+	-- Strays in the world
+	LureStray         = "LureStray",         -- spend a treat to add a wandering stray
+	-- Mount / fast travel
+	RideDog           = "RideDog",
+	-- Treasures
+	CollectTreasure   = "CollectTreasure",
+	-- Home dog wants
+	HomeWantFulfill   = "HomeWantFulfill",
+	HomeWantUpdate    = "HomeWantUpdate",
+	-- Onboarding + daily login
+	TutorialOpen      = "TutorialOpen",
+	DailyLoginReward  = "DailyLoginReward",
+	-- Live events
+	EventBroadcast    = "EventBroadcast",
+	-- Decor / customization
+	BuyDecor          = "BuyDecor",
+	SellDecor         = "SellDecor",
+	DecorCatalogSync  = "DecorCatalogSync",
+	-- Social
+	BarkCode          = "BarkCode",
+	BarkCodeAck       = "BarkCodeAck",
+	-- Time
+	TimeOfDayUpdate   = "TimeOfDayUpdate",
 	-- General profile sync
 	ProfileSync       = "ProfileSync",
 }
