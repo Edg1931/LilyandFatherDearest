@@ -264,22 +264,23 @@ WorldBuilder.PORTALS = {}  -- name → { position, target }
 
 local function buildPortal(parent, name, x, z, color, label, targetName)
 	local g = group("Portal_" .. name, parent)
-	local ring = makePart({ parent = g,
-		size = Vector3.new(8, 0.4, 8),
+	-- Walkable disk (CanCollide so player stands on it; also detects Touched)
+	local disk = makePart({ parent = g,
+		size = Vector3.new(10, 0.4, 10),
 		position = Vector3.new(x, 1, z),
 		color = color,
 		material = Enum.Material.Neon,
 		shape = Enum.PartType.Cylinder,
 		transparency = 0.2,
 		shadow = false,
-		collide = false,
-		name = "PortalRing",
+		collide = true,
+		name = "PortalDisk",
 	})
-	ring.CFrame = CFrame.new(x, 1, z) * CFrame.Angles(0, 0, math.rad(90))
-	-- Vertical column of light
+	disk.CFrame = CFrame.new(x, 1, z) * CFrame.Angles(0, 0, math.rad(90))
+	-- Tall column of light so it's visible from far
 	local col = makePart({ parent = g,
-		size = Vector3.new(6, 14, 6),
-		position = Vector3.new(x, 8, z),
+		size = Vector3.new(6, 16, 6),
+		position = Vector3.new(x, 9, z),
 		color = color,
 		material = Enum.Material.Neon,
 		shape = Enum.PartType.Cylinder,
@@ -287,13 +288,20 @@ local function buildPortal(parent, name, x, z, color, label, targetName)
 		shadow = false,
 		collide = false,
 	})
-	col.CFrame = CFrame.new(x, 8, z) * CFrame.Angles(0, 0, math.rad(90))
+	col.CFrame = CFrame.new(x, 9, z) * CFrame.Angles(0, 0, math.rad(90))
+	-- A point light so it glows at night
+	local light = Instance.new("PointLight")
+	light.Color = color
+	light.Range = 28
+	light.Brightness = 1.6
+	light.Parent = disk
+
 	-- Floating sign
 	local signGui = Instance.new("BillboardGui")
 	signGui.Size = UDim2.fromOffset(220, 50)
-	signGui.StudsOffset = Vector3.new(0, 8, 0)
+	signGui.StudsOffset = Vector3.new(0, 12, 0)
 	signGui.AlwaysOnTop = true
-	signGui.Parent = ring
+	signGui.Parent = disk
 	local frame = Instance.new("Frame")
 	frame.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
 	frame.BackgroundTransparency = 0.2
@@ -309,16 +317,16 @@ local function buildPortal(parent, name, x, z, color, label, targetName)
 	lbl.Text = label
 	lbl.Parent = frame
 
-	-- ProximityPrompt for travel
+	-- Hold-prompt as a backup (e.g. on PC where stepping can be twitchy)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = label
 	prompt.ObjectText = "Fast Travel"
-	prompt.HoldDuration = 0.4
+	prompt.HoldDuration = 0.2
 	prompt.MaxActivationDistance = 14
 	prompt.RequiresLineOfSight = false
-	prompt.Parent = ring
+	prompt.Parent = disk
 
-	WorldBuilder.PORTALS[name] = { position = Vector3.new(x, 1, z), target = targetName, prompt = prompt }
+	WorldBuilder.PORTALS[name] = { position = Vector3.new(x, 1, z), target = targetName, prompt = prompt, disk = disk }
 	return prompt
 end
 
@@ -380,26 +388,51 @@ local function building(parent, opts)
 		local interiorLight = makePart({ parent = g, size = Vector3.new(2, 0.4, 2), position = Vector3.new(x, h, z), color = Color3.fromRGB(255, 240, 200), material = Enum.Material.Neon, shadow = false, collide = false })
 		local pl = Instance.new("PointLight") pl.Range = 20 pl.Brightness = 1.0 pl.Color = Color3.fromRGB(255, 240, 200) pl.Parent = interiorLight
 
-		-- Enter prompt at the door (visible label)
-		local doorPrompt = Instance.new("Part")
-		doorPrompt.Anchored = true
-		doorPrompt.CanCollide = false
-		doorPrompt.Transparency = 1
-		doorPrompt.Size = Vector3.new(2, 4, 2)
-		doorPrompt.Position = Vector3.new(x, 4, z + d / 2 + 0.6)
-		doorPrompt.Parent = g
+		-- Enter pad outside the door
+		local enterPad = Instance.new("Part")
+		enterPad.Anchored = true
+		enterPad.CanCollide = false
+		enterPad.Transparency = 1
+		enterPad.Size = Vector3.new(2, 4, 2)
+		enterPad.Position = Vector3.new(x, 4, z + d / 2 + 0.6)
+		enterPad.Parent = g
 		local enter = Instance.new("ProximityPrompt")
 		enter.ActionText = "Enter"
 		enter.ObjectText = opts.name or "Building"
 		enter.HoldDuration = 0
 		enter.MaxActivationDistance = 12
 		enter.RequiresLineOfSight = false
-		enter.Parent = doorPrompt
-		-- Teleport player a few studs into the building
+		enter.Parent = enterPad
+		-- Place player just inside the door, facing back into the building
+		local insideSpot = Vector3.new(x, 4, z + d / 2 - 4)
+		local lookSpot = Vector3.new(x, 4, z - d / 2)  -- looks toward back wall
 		enter.Triggered:Connect(function(player)
 			local char = player.Character
 			local root = char and char:FindFirstChild("HumanoidRootPart")
-			if root then root.CFrame = CFrame.new(x, 4, z - d / 4 + 4) end
+			if root then root.CFrame = CFrame.lookAt(insideSpot, lookSpot) end
+		end)
+
+		-- Exit pad inside the door (a few studs behind the entry spot)
+		local exitPad = Instance.new("Part")
+		exitPad.Anchored = true
+		exitPad.CanCollide = false
+		exitPad.Transparency = 1
+		exitPad.Size = Vector3.new(2, 4, 2)
+		exitPad.Position = Vector3.new(x, 4, z + d / 2 - 5)
+		exitPad.Parent = g
+		local exitPrompt = Instance.new("ProximityPrompt")
+		exitPrompt.ActionText = "Exit"
+		exitPrompt.ObjectText = opts.name or "Building"
+		exitPrompt.HoldDuration = 0
+		exitPrompt.MaxActivationDistance = 12
+		exitPrompt.RequiresLineOfSight = false
+		exitPrompt.Parent = exitPad
+		local outsideSpot = Vector3.new(x, 4, z + d / 2 + 6)
+		local outsideLook = Vector3.new(x, 4, z + d / 2 + 100)  -- looks away from building
+		exitPrompt.Triggered:Connect(function(player)
+			local char = player.Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			if root then root.CFrame = CFrame.lookAt(outsideSpot, outsideLook) end
 		end)
 	end
 

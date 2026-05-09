@@ -24,13 +24,29 @@ local TEMPERAMENT = {
 
 local strays = {}  -- model → { model, body, breed, home, target, dwell, temperament }
 
-local function pickRandomBreed(allowedRarities)
-	allowedRarities = allowedRarities or { Common = true, Uncommon = true, Rare = true }
-	local pool = {}
-	for id, b in pairs(DogBreeds.BY_ID) do
-		if allowedRarities[b.rarity] then table.insert(pool, id) end
+-- Rarity distribution for wild strays. Heavily weighted toward Common; rarer
+-- breeds are genuinely rare. Mythics never roam in the wild — those are
+-- earned via tier-up combines.
+local STRAY_RARITY_WEIGHTS = { Common = 75, Uncommon = 20, Rare = 4, Epic = 1 }
+
+local function pickRandomBreed()
+	local total = 0
+	for _, w in pairs(STRAY_RARITY_WEIGHTS) do total += w end
+	local r = math.random() * total
+	local acc = 0
+	for rarity, w in pairs(STRAY_RARITY_WEIGHTS) do
+		acc += w
+		if r <= acc then
+			local pool = {}
+			for id, b in pairs(DogBreeds.BY_ID) do
+				if b.rarity == rarity then table.insert(pool, id) end
+			end
+			if #pool > 0 then
+				return pool[math.random(1, #pool)]
+			end
+		end
 	end
-	return pool[math.random(1, #pool)]
+	return "golden_retriever"
 end
 
 local function pickTarget(home, radius)
@@ -166,15 +182,32 @@ local function step(stray, dt)
 end
 
 local STRAY_HOMES = {
-	Vector3.new(-30, 0, -180),     -- park
-	Vector3.new(50,  0, -220),     -- park east
-	Vector3.new(-180, 0, 220),     -- meadow
-	Vector3.new(160, 0, 230),      -- dog park
-	Vector3.new(-60, 0, 380),      -- beach
-	Vector3.new(360, 0, 80),       -- downtown
-	Vector3.new(-140, 0, 30),      -- suburbs alley
-	Vector3.new(-610, 0, 80),      -- home district
-	Vector3.new(0, 0, 200),        -- riverside
+	-- Park (more, since this is the natural early-game zone)
+	Vector3.new(-30, 0, -180),
+	Vector3.new(50,  0, -220),
+	Vector3.new(-60, 0, -240),
+	Vector3.new(20,  0, -160),
+	-- Meadow
+	Vector3.new(-180, 0, 220),
+	Vector3.new(-220, 0, 250),
+	-- Dog park
+	Vector3.new(160, 0, 230),
+	Vector3.new(110, 0, 280),
+	-- Beach
+	Vector3.new(-60, 0, 380),
+	Vector3.new(80, 0, 400),
+	-- Downtown
+	Vector3.new(360, 0, 80),
+	-- Bakery district
+	Vector3.new(220, 0, -150),
+	-- Suburbs alley
+	Vector3.new(-140, 0, 30),
+	-- Home district
+	Vector3.new(-610, 0, 80),
+	Vector3.new(-560, 0, -50),
+	-- Riverside
+	Vector3.new(0, 0, 200),
+	Vector3.new(-100, 0, 220),
 }
 
 function StrayService.spawnInitial()
