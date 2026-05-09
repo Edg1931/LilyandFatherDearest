@@ -77,6 +77,49 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if input.KeyCode == Enum.KeyCode.Q then QuestLogUI.startQuest("daily_walk") end
 end)
 
+Remotes.EVENTS[Remotes.NAMES.EventBroadcast].OnClientEvent:Connect(function(payload)
+	local g = Instance.new("ScreenGui")
+	g.IgnoreGuiInset = true
+	g.Parent = playerGui
+	local f = Instance.new("Frame")
+	f.AnchorPoint = Vector2.new(0.5, 0)
+	f.Position = UDim2.new(0.5, 0, 0, 110)
+	f.Size = UDim2.fromOffset(380, 70)
+	local color = Color3.fromRGB(80, 130, 200)
+	if payload.color == "rare" then color = Color3.fromRGB(110, 180, 255)
+	elseif payload.color == "epic" then color = Color3.fromRGB(180, 120, 255)
+	elseif payload.color == "good" then color = Color3.fromRGB(60, 160, 100)
+	elseif payload.color == "neutral" then color = Color3.fromRGB(120, 120, 140)
+	end
+	f.BackgroundColor3 = color
+	f.BorderSizePixel = 0
+	local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, 12) c.Parent = f
+	local title = Instance.new("TextLabel")
+	title.BackgroundTransparency = 1
+	title.Position = UDim2.fromOffset(12, 4)
+	title.Size = UDim2.new(1, -24, 0, 24)
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 14
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.Text = payload.title or ""
+	title.Parent = f
+	local body = Instance.new("TextLabel")
+	body.BackgroundTransparency = 1
+	body.Position = UDim2.fromOffset(12, 28)
+	body.Size = UDim2.new(1, -24, 0, 36)
+	body.Font = Enum.Font.Gotham
+	body.TextSize = 12
+	body.TextColor3 = Color3.fromRGB(245, 245, 250)
+	body.TextWrapped = true
+	body.TextXAlignment = Enum.TextXAlignment.Left
+	body.TextYAlignment = Enum.TextYAlignment.Top
+	body.Text = payload.body or ""
+	body.Parent = f
+	f.Parent = g
+	task.delay(payload.duration or 4, function() g:Destroy() end)
+end)
+
 Remotes.EVENTS[Remotes.NAMES.BarkCodeAck].OnClientEvent:Connect(function(payload)
 	-- A small toast-style notification.
 	local g = Instance.new("ScreenGui")

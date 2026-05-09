@@ -1,6 +1,7 @@
 local QuestService = require(script.Parent.QuestService)
 local WorldBuilder = require(script.Parent.WorldBuilder)
 local PlayerDataService = require(script.Parent.PlayerDataService)
+local MiniGameService = require(script.Parent.MiniGameService)
 local Constants = require(game.ReplicatedStorage.Shared.Constants)
 
 local NpcSpawner = {}
@@ -166,6 +167,8 @@ local OUTDOOR = {
 	  position = Vector3.new(-30, 0, 170),  quest = "puppy_under_bridge", actionText = "Help puppy" },
 	{ id = "trainer",     name = "Trainer Joy", bodyColor = Color3.fromRGB(200, 90, 90),  hatColor = Color3.fromRGB(100, 30, 30),
 	  position = Vector3.new(80, 0, 240),   quest = "agility_qualifier", actionText = "Agility" },
+	{ id = "bone_master", name = "Bone Master", bodyColor = Color3.fromRGB(180, 130, 80), hatColor = Color3.fromRGB(60, 40, 25),
+	  position = Vector3.new(140, 0, 220),  minigame = "find_bones", badge = "🦴", badgeColor = Color3.fromRGB(255, 220, 100), actionText = "Find the Bones (60s)" },
 }
 
 local INTERIOR = {
@@ -212,6 +215,8 @@ function NpcSpawner.spawnAll(parent)
 		prompt.Triggered:Connect(function(player)
 			if def.tutorial then
 				Remotes.EVENTS[Remotes.NAMES.TutorialOpen]:FireClient(player, { source = "npc" })
+			elseif def.minigame == "find_bones" then
+				MiniGameService.start(player)
 			elseif def.quest then
 				QuestService.start(player, def.quest)
 			end
